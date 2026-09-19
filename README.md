@@ -38,6 +38,15 @@ Captured from the live demo ([mist-app.onrender.com](https://mist-app.onrender.c
 
 ![Client profile (title crop)](docs/screenshots/09-client-profile.png)
 
+### Product reviews, offers & checkout
+
+| | |
+|---|---|
+| Verified product reviews | Offers filter |
+| ![Reviews](docs/screenshots/19-product-reviews.png) | ![Offers](docs/screenshots/20-offers.png) |
+| Checkout payment choice (Bank Card / COD) | Product detail (Arabic) |
+| ![Checkout](docs/screenshots/21-checkout.png) | ![Product AR](docs/screenshots/22-bilingual-product-ar.png) |
+
 ### Admin
 
 | | |
