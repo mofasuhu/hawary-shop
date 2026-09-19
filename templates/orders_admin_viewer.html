@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% block title %}{{ g.translations['Manage_Orders'] }}{% endblock %}
+
+{% block content %}
+<style>
+    table thead th { background-color: #36454F; color: white; }
+    tbody tr:hover { background-color: lightblue; }
+    th a { color: white; text-decoration: none; display: block; width: 100%; }
+    th a:hover { text-decoration: underline; }
+    th .sort-icon { margin-left: 5px; font-size: 0.8em; }
+    .search-and-filter-bar { margin-bottom: 15px; display: flex; gap: 10px; align-items: center; }
+    .search-and-filter-bar input[type="text"], .search-and-filter-bar select { width: 250px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+    .search-and-filter-bar button { padding: 8px 12px; }
+    .pagination { margin-top: 20px; text-align: center; }
+    .pagination a, .pagination span { margin: 0 5px; padding: 8px 12px; text-decoration: none; border: 1px solid #ddd; color: #337ab7; border-radius: 4px; }
+    .pagination .disabled { color: #777; pointer-events: none; background-color: #f5f5f5; }
+    .pagination .active { font-weight: bold; color: white; background-color: #337ab7; border-color: #337ab7; }
+</style>
+
+<a href="{{ url_for('home') }}" class="back-button">{{ g.translations['Back_to_Home'] }}</a>
+<h1>{{ g.translations['Manage_Orders'] }}</h1>
+
+<a href="{{ url_for('download_orders_data') }}"><button class="dbutton">{{ g.translations['Download_Orders'] }}</button></a>
+
+<div class="search-and-filter-bar">
+    <form method="get" action="{{ url_for('orders_admin_viewer') }}">
+        <input type="text" name="q" placeholder="{{ g.translations['Search_by_user_order_details'] }}" value="{{ search_query or '' }}">
+        
+        <select name="status" onchange="this.form.submit()">
+            <option value="">{{ g.translations['All_Statuses'] }}</option>
+            {% for status in all_statuses %}
+                <option value="{{ status }}" {% if status == filter_status %}selected{% endif %}>
+                    {{ g.translations[status] }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">{{ g.translations['Search'] }}</button>
+        <a href="{{ url_for('orders_admin_viewer') }}"><button type="button">{{ g.translations['reset'] }}</button></a>
+    </form>
+</div>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                {% macro sortable_th(column_key, display_text) %}
+                    {% set next_order = 'desc' if sort_by == column_key and sort_order == 'asc' else 'asc' %}
+                    <th>
+                        <a href="{{ url_for('orders_admin_viewer', sort_by=column_key, sort_order=next_order, q=search_query, status=filter_status, page=pagination.page) }}">
+                            {{ display_text }}
+                            {% if sort_by == column_key %}<span class="sort-icon">{{ '▲' if sort_order == 'asc' else '▼' }}</span>{% else %}<span class="sort-icon">▲▼</span>{% endif %}
+                        </a>
+                    </th>
+                {% endmacro %}
+
+                {{ sortable_th('client_id', g.translations['Client_ID']) }}
+                <th>{{ g.translations['Username'] }}</th>
+                <th>{{ g.translations['Full_Name'] }}</th>
+                {{ sortable_th('id', g.translations['Order_ID']) }}
+                {{ sortable_th('date', g.translations['Ordering_Date']) }}
+                <th>{{ g.translations['Mobile'] }}</th>
+                <th>{{ g.translations['Address'] }}</th>
+                {{ sortable_th('payment_method', g.translations['Pay_Method']) }}
+                {{ sortable_th('payment_status', g.translations['Pay_Status']) }}
+                <th>{{ g.translations['Order_Items'] }}</th>
+                {{ sortable_th('total_price', g.translations['Order_Price'] ~ ' (' ~ g.translations['EGP'] ~ ')') }}
+                <th>{{ g.translations['Delivery_Fees'] ~ ' (' ~ g.translations['EGP'] ~ ')' }}</th>
+                <th>{{ g.translations['Transaction_Amount'] ~ ' (' ~ g.translations['EGP'] ~ ')' }}</th>
+                <th>{{ g.translations['Refunded_Amount'] ~ ' (' ~ g.translations['EGP'] ~ ')' }}</th>
+                <th>{{ g.translations['Net_Amount'] ~ ' (' ~ g.translations['EGP'] ~ ')' }}</th>
+                <th>{{ g.translations['Promocode'] }}</th>
+                <th>{{ g.translations['Discount'] }} (%)</th>
+                <th>{{ g.translations['PayMob_Parent_Transaction_ID'] }}</th>
+                {{ sortable_th('status', g.translations['Status']) }}
+                <th>{{ g.translations['Update'] }}</th>
+                <th>{{ g.translations['Edit'] }}</th>
+                {% if current_user.superadmin %}<th style="background-color: red">{{ g.translations['Delete'] }}</th>{% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.user.id }}</td>
+                <td>{{ order.user.username }}</td>
+                <td>{{ order.recipient_name }}</td>
+                <td>{{ order.id }}</td>
+                <td>{{ order.date | to_cairo_time | datetimeformat }}</td>
+                <td>{{ order.recipient_phone }}</td>
+                <td style="{% if order.address|contains_arabic %}direction: rtl{% else %}direction: ltr{% endif %}">{{ order.address }}</td>
+                <td>{{ g.translations[order.payment_method.replace(' ', '_')] }}</td>
+                <td>{{ g.translations[order.payment_status.replace(' ', '_')] }}</td>
+                <td>{% for item in order.items %}• {{ item.product.name_ar if g.current_language == 'ar' else item.product.name_en }} ({{ item.product_size.size_ar if g.current_language == 'ar' else item.product_size.size_en }}): {{ item.quantity }} × {{ '%.2f' % item.price }}</br>{% endfor %}</td>
+                <td>{{ '%.2f' % order.order_total_price }}</td>
+                <td>{{ '%.2f' % order.delivery_fees }} {{ g.translations['EGP'] }}</td>
+                <td>{% if order.transaction %}{{ '%.2f' % (order.transaction.amount_cents / 100) }}{% else %}0.00{% endif %}</td>
+                <td>{% if order.transaction %}{{ '%.2f' % (order.transaction.refunded_amount_cents / 100) }}{% else %}0.00{% endif %}</td>
+                <td>
+                        {% if order.transaction %}
+                        {{ '%.2f' % (order.transaction.net_amount_cents / 100) }}
+                        {% elif order.status == 'Cancelled' %}
+                        0.00
+                        {% else %}
+                        {{ '%.2f' % order.order_total_price }}
+                        {% endif %}
+                </td> 
+                <td>{{ g.translations['No_Promocode'] if order.order_promocode_used=="No Promocode" else order.order_promocode_used }}</td>
+                <td>{{ order.order_discount_percent }}</td>
+                <td>{% if order.transaction %}{{ order.transaction.transaction_id }}{% else %}{{ g.translations['No_Trn'] }}{% endif %}</td>
+                <td>{{ g.translations[order.status] }}</td>
+                <td>
+                    <div class="form-container">
+                        <form action="{{ url_for('update_order_status', order_id=order.id) }}" method="post">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <div class="table-form-group"><select name="status" data-current-status="{{ order.status }}"></select></div>
+                            <div class="table-form-group"><input type="submit" value="{{ g.translations['Update'] }}"></div>
+                        </form>
+                    </div>
+                </td>
+                <td>
+                    <input type="hidden" id="orderStatus_{{ order.id }}" value="{{ order.status }}">
+                    <input type="hidden" id="paymentMethod_{{ order.id }}" value="{{ order.payment_method }}">
+                    <span id="orderEditMessage_{{ order.id }}"></span>
+                    <a href="{{ url_for('admin_edit_order', order_id=order.id) }}" onclick="return validateOrderEdit('{{ order.id }}');"><button>{{ g.translations['Edit'] }}</button></a>
+                </td>
+                {% if current_user.superadmin %}
+                <td style="background-color: red">
+                    <div class="form-container">
+                        <form action="{{ url_for('superadmin_delete_order', order_id=order.id) }}" method="post">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <div class="table-form-group">
+                                <input type="button" value="{{ g.translations['Delete'] }}" onclick="showConfirmAndSubmit('{{ g.translations['Are_you_sure_you_want_to_delete_this_order'] }}', this.form);">
+                            </div>
+                        </form>
+                    </div>
+                    {% if order.payment_status == 'Paid' and order.transaction %}
+                    <div class="form-container">
+                        <form action="{{ url_for('refund_order', transaction_id=order.transaction.id) }}" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <div class="table-form-group"><input type="text" inputmode="decimal" pattern="^\d*\.?\d*$" class="custom-number-input" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" id="refund_amount" name="refund_amount" min="0" max="{{ order.transaction.net_amount_cents / 100 }}" step="0.01" required></div>
+                            <div class="table-form-group"><input type="button" value="{{ g.translations['Refund'] }}" onclick="showConfirmAndSubmit('{{ g.translations['Are_you_sure_you_want_to_refund_this_amount'] }}', this.form);"></div>
+                        </form>
+                    </div>
+                    {% endif %}
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
+
+<div class="pagination">
+    <a href="{{ url_for('orders_admin_viewer', page=pagination.prev_num, sort_by=sort_by, sort_order=sort_order, q=search_query, status=filter_status) if pagination.has_prev else '#' }}"
+       class="{{ 'disabled' if not pagination.has_prev }}">&#8249; {{ g.translations['Previous'] }}</a>
+    {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=1) %}
+        {% if page_num %}
+            <a href="{{ url_for('orders_admin_viewer', page=page_num, sort_by=sort_by, sort_order=sort_order, q=search_query, status=filter_status) }}"
+               class="{{ 'active' if page_num == pagination.page else '' }}">{{ page_num }}</a>
+        {% else %}
+            <span class="disabled">...</span>
+        {% endif %}
+    {% endfor %}
+    <a href="{{ url_for('orders_admin_viewer', page=pagination.next_num, sort_by=sort_by, sort_order=sort_order, q=search_query, status=filter_status) if pagination.has_next else '#' }}"
+       class="{{ 'disabled' if not pagination.has_next }}">{{ g.translations['Next'] }} &#8250;</a>
+</div>
+
+
+{% endblock %}

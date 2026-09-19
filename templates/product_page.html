@@ -1,0 +1,398 @@
+{% extends 'base.html' %}
+{% block title %}{{ seo.title }}{% endblock %}
+{% block meta_description %}{{ seo.description }}{% endblock %}
+
+{% block og_title %}{{ seo.og_title }}{% endblock %}
+{% block og_description %}{{ seo.og_description }}{% endblock %}
+{% block og_image %}{{ seo.og_image }}{% endblock %}
+{% block og_type %}product{% endblock %}
+{% block og_locale %}{{ seo.og_locale }}{% endblock %}
+{% block twitter_title %}{{ seo.og_title }}{% endblock %}
+{% block twitter_description %}{{ seo.og_description }}{% endblock %}
+{% block twitter_image %}{{ seo.og_image }}{% endblock %}
+
+{% block og_product_extra %}
+{% if seo.og_price_amount %}
+<meta property="product:price:amount" content="{{ seo.og_price_amount }}">
+<meta property="product:price:currency" content="{{ seo.og_price_currency }}">
+<meta property="og:price:amount" content="{{ seo.og_price_amount }}">
+<meta property="og:price:currency" content="{{ seo.og_price_currency }}">
+{% endif %}
+{% endblock %}
+
+{% block head_extra %}
+<script type="application/ld+json">{{ seo.json_ld | tojson }}</script>
+{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('home') }}" class="back-button" style="font-size: 12px;">{{ g.translations['Back_to_Home'] }}</a>
+
+<br><br>
+
+<div class="product-detail-container">
+    <div class="product-card" data-product-id="{{ product.id }}">
+        <h1>{{ product.name_ar if g.current_language == 'ar' else product.name_en }}</h1>
+
+        <!-- ================== ENHANCED PRODUCT IMAGE SLIDER ================== -->
+        <div class="product-images-slider" style="position: relative;">
+            {% if product.discount_percent > 0 %}
+            <div class="discount-badge" style="position: absolute; top: 10px; right: 10px; background: red; color: white; padding: 5px 10px; border-radius: 5px; font-weight: bold; z-index: 10;">
+                {{ "%.0f"|format(product.discount_percent) }}% {% if g.current_language == 'ar' %}خصم{% else %}OFF{% endif %}
+            </div>
+            {% endif %}
+            <!-- Main Slider with Arrows -->
+            <div class="main-slider-wrapper">
+                <img class="prev-slide arrow-image" src="{{ url_for('static', filename='left_arrow.png') }}"
+                    alt="Previous">
+                <img class="next-slide arrow-image" src="{{ url_for('static', filename='right_arrow.png') }}"
+                    alt="Next">
+                <div class="slider-container">
+                    <div class="slides">
+                        {% set all_images = [
+                        product.image_url, product.image_url_2, product.image_url_3,
+                        product.image_url_4, product.image_url_5, product.image_url_6,
+                        product.image_url_7, product.image_url_8, product.image_url_9,
+                        product.image_url_10
+                        ] | reject('equalto', '') | reject('none') | list %}
+
+                        {% for image in all_images %}
+                        <img src="{{ image if image.startswith('http' ) else url_for('static', filename=image) }}"
+                            alt="{{ product.name_ar if g.current_language == 'ar' else product.name_en }} - Image {{ loop.index }}">
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thumbnail Navigation -->
+            {% if all_images|length > 1 %}
+            <div class="thumbnail-container">
+                {% for image in all_images %}
+                <img src="{{ image if image.startswith('http' ) else url_for('static', filename=image) }}"
+                    class="thumbnail-image" data-index="{{ loop.index0 }}" {# Use 0-based index for JS #}
+                    alt="Thumbnail {{ loop.index }}">
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        <!-- ==================================================================== -->
+
+
+
+        <p><b>{{ g.translations['Category'] }}:</b> {{ product.category_ar if g.current_language == 'ar' else
+            product.category_en }}</p>
+        <p><b>{{ g.translations['Gender'] }}:</b> {{ product.gender_ar if g.current_language == 'ar' else
+            product.gender_en }}</p>
+        <p><b>{{ g.translations['Ingredients'] }}:</b> {{ product.ingredients_ar if g.current_language == 'ar' else
+            product.ingredients_en }}</p>
+        <p><b>{{ g.translations['Description'] }}:</b> {{ (product.description_ar if g.current_language == 'ar' else
+            product.description_en) | safe }}</p>
+
+        {% set product_sizes = product.sizes | sort(attribute='price') %}
+        <div class="form-container" id="choosing_size">
+            <p style="font-size: 15px;"><b>{{ g.translations['Product_Size'] }}:</b>
+            <form action="{{ url_for('product_page', product_id=product.id) }}#choosing_size" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="form-group">
+                    <select name="product_size_id" onchange="this.form.submit()"
+                        style="width: 150px; font-size:14px !important;">
+                        <option value="">{{ g.translations['Choose_a_size'] }}</option>
+                        {% for product_size in product_sizes %}
+                        <option value="{{ product_size.id }}" {% if (selected_product_size and
+                            selected_product_size.id==product_size.id) or (product_sizes|length==1 and not
+                            selected_product_size) %}selected{% endif %}>
+                            {{ product_size.size_ar if g.current_language == 'ar' else product_size.size_en }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </form>
+            </p>
+        </div>
+
+        {% if selected_product_size %}
+        <p><b>{{ g.translations['Price'] }}:</b> 
+            {% if product.discount_percent > 0 %}
+                <span style="text-decoration: line-through; color: gray;">{{ '%.2f' % selected_product_size.price }}</span>
+                <span style="color: red; font-weight: bold; margin-left: 5px;">{{ '%.2f' % (selected_product_size.price * (1 - product.discount_percent/100)) }}</span>
+            {% else %}
+                {{ '%.2f' % selected_product_size.price }}
+            {% endif %}
+            {{ g.translations['EGP'] }}
+        </p>
+        {% else %}
+        {% if product_sizes|length > 1 %}
+        <p style="font-size: 15px;"><b>{{ g.translations['Price'] }}:</b>
+            {% if product.discount_percent > 0 %}
+                <span style="text-decoration: line-through; color: gray;">{{ '%.2f'|format(product_sizes[0].price) }}</span>
+                <span style="color: red; font-weight: bold; margin-left: 5px;">{{ '%.2f'|format(product_sizes[0].price * (1 - product.discount_percent/100)) }}</span>
+                &#x2013; 
+                <span style="text-decoration: line-through; color: gray;">{{ '%.2f'|format(product_sizes[-1].price) }}</span>
+                <span style="color: red; font-weight: bold; margin-left: 5px;">{{ '%.2f'|format(product_sizes[-1].price * (1 - product.discount_percent/100)) }}</span>
+            {% else %}
+                {{ '%.2f'|format(product_sizes[0].price) }} &#x2013; {{ '%.2f'|format(product_sizes[-1].price) }}
+            {% endif %}
+            {{ g.translations['EGP'] }}</p>
+        {% elif product_sizes|length == 1 %}
+        <p style="font-size: 15px;"><b>{{ g.translations['Price'] }}:</b>
+            {% if product.discount_percent > 0 %}
+                <span style="text-decoration: line-through; color: gray;">{{ '%.2f'|format(product_sizes[0].price) }}</span>
+                <span style="color: red; font-weight: bold; margin-left: 5px;">{{ '%.2f'|format(product_sizes[0].price * (1 - product.discount_percent/100)) }}</span>
+            {% else %}
+                {{ '%.2f'|format(product_sizes[0].price) }}
+            {% endif %}
+            {{ g.translations['EGP'] }}</p>
+        {% else %}
+        <p style="font-size: 15px; color: gray;"><b>{{ g.translations['Price'] }}:</b>
+            {{ g.translations['Price_Not_Available'] }}</p>
+        {% endif %}
+        {% endif %}
+
+        <p><b>{{ g.translations['Available_Quantity'] }}:</b>
+            <span id="available-quantity-display" data-available-quantity="{{ current_available_quantity }}">
+                {{ current_available_quantity }}
+            </span>
+            {% if current_available_quantity == 0 %}
+            <span style="color: red;">({{ g.translations['Out_of_Stock'] }})</span>
+            {% endif %}
+        </p>
+
+        {% set count = order.get(cart_key, {}).get('quantity', 0) %}
+        <input type="hidden" id="hidden_cart_key" value="{{ cart_key }}">
+
+        {% if current_user.role != 'admin' %}
+        <input type="text" inputmode="numeric" pattern="[0-9]*" class="custom-number-input" id="quantity-input"
+            value="{{ count if count > 0 else 0 }}" min="0" max="{{ current_available_quantity }}"
+            aria-label="Quantity">
+        <button id="add-to-cart-button" class="add-to-cart-btn" data-product-id="{{ product.id }}"
+            data-product-size-id="{{ selected_product_size.id if selected_product_size else '' }}"
+            data-authenticated="{{ 'true' if current_user.is_authenticated else 'false' }}"
+            style="background-color: var(--brand-accent); color: white; border: none; border-radius: 5px; font-size: 20px !important; padding: 3px; cursor: pointer; width: 175px; height: 45px; vertical-align: middle;"
+            onmouseover="this.style.backgroundColor='#e68a00'" onmouseout="this.style.backgroundColor='#ff9900'">
+            {% if count > 0 %}
+            {{ g.translations['Update_Cart'] }}
+            {% else %}
+            {{ g.translations['Add_to_Cart'] }}
+            {% endif %} &#x2000;<i class="fas fa-shopping-cart"></i>
+        </button>
+        
+        {% set in_wishlist = current_user.is_authenticated and current_user.wishlist and product.id in current_user.wishlist.products %}
+        {% if in_wishlist %}
+            <button class="wishlist-toggle-btn" data-product-id="{{ product.id }}" data-action="remove" data-authenticated="{{ 'true' if current_user.is_authenticated else 'false' }}" style="background: white; border: 1px solid #ddd; color: red; font-size: 24px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; width: 45px; height: 45px; border-radius: 50%; vertical-align: middle; margin-left: 10px; transition: all 0.3s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.1);" title="{{ g.translations['Remove_from_Wishlist'] }}">
+                <i class="fa-solid fa-heart"></i>
+            </button>
+        {% else %}
+            <button class="wishlist-toggle-btn" data-product-id="{{ product.id }}" data-action="add" data-authenticated="{{ 'true' if current_user.is_authenticated else 'false' }}" style="background: white; border: 1px solid #ddd; color: gray; font-size: 24px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; width: 45px; height: 45px; border-radius: 50%; vertical-align: middle; margin-left: 10px; transition: all 0.3s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.1);" title="{{ g.translations['Add_to_Wishlist'] }}">
+                <i class="fa-regular fa-heart"></i>
+            </button>
+        {% endif %}
+        
+        {% endif %}
+
+
+
+
+
+
+    </div>
+</div>
+
+<div class="product-reviews-container" style="max-width: 930px; margin: 40px auto; padding: 20px; background: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 2px solid #f8f9fa; padding-bottom: 15px;">
+        <h2 style="margin: 0; font-size: 24px; color: #333;">{{ g.translations['Product_Reviews'] }}</h2>
+        <span style="background: #f0f0f0; padding: 4px 12px; border-radius: 20px; font-size: 14px; color: #666;">
+            {{ product.reviews | length }} {{ g.translations['Reviews'] | default('Reviews') }}
+        </span>
+    </div>
+    
+    {% if current_user.is_authenticated and has_purchased %}
+    <!-- <div class="add-review-section" style="background: #fdfdfd; border: 1px solid #edf2f7; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
+        <h3 style="margin-top: 0; font-size: 18px;">{{ g.translations['Write_a_Review'] }}</h3>
+        <form action="{{ url_for('add_product_review', product_id=product.id) }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600;">{{ g.translations['Rating'] }}:</label>
+                <div class="rating-stars-input" style="display: flex; gap: 10px;">
+                    <select name="rating" id="rating" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #cbd5e0; background: white; cursor: pointer; min-width: 120px;" required>
+                        <option value="5">5 ★★★★★</option>
+                        <option value="4">4 ★★★★</option>
+                        <option value="3">3 ★★★</option>
+                        <option value="2">2 ★★</option>
+                        <option value="1">1 ★</option>
+                    </select>
+                </div>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label for="review_text" style="display: block; margin-bottom: 8px; font-weight: 600;">{{ g.translations['Review'] }}:</label>
+                <textarea name="review_text" id="review_text" rows="4" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e0; font-family: inherit; resize: vertical;" placeholder="{{ g.translations['Tell_us_more'] }}" required></textarea>
+            </div>
+            <button type="submit" style="background: var(--brand-accent, #ff9900); color: white; border: none; padding: 10px 25px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: opacity 0.2s;">
+                {{ g.translations['Submit_Review'] }}
+            </button>
+        </form>
+    </div> -->
+
+    <div class="add-review-section">
+    <h3 class="review-heading">{{ g.translations['Write_a_Review'] }}</h3>
+
+    <form action="{{ url_for('add_product_review', product_id=product.id) }}" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="review-form-grid">
+        <div class="review-field">
+        <label>{{ g.translations['Rating'] }}</label>
+        <div class="star-rating">
+            <input type="radio" name="rating" id="star5" value="5" required>
+            <label for="star5" title="5 stars">&#9733;</label>
+            <input type="radio" name="rating" id="star4" value="4">
+            <label for="star4" title="4 stars">&#9733;</label>
+            <input type="radio" name="rating" id="star3" value="3">
+            <label for="star3" title="3 stars">&#9733;</label>
+            <input type="radio" name="rating" id="star2" value="2">
+            <label for="star2" title="2 stars">&#9733;</label>
+            <input type="radio" name="rating" id="star1" value="1">
+            <label for="star1" title="1 star">&#9733;</label>
+        </div>
+        </div>
+
+        <div class="review-field review-field--textarea">
+        <label for="review_text">{{ g.translations['Review'] }}</label>
+        <textarea
+            name="review_text"
+            id="review_text"
+            rows="4"
+            class="review-textarea"
+            placeholder="{{ g.translations['Tell_us_more'] }}"
+            required
+        ></textarea>
+        </div>
+    </div>
+
+    <div class="review-form-footer">
+        <button type="submit" class="review-submit-btn">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+        </svg>
+        {{ g.translations['Submit_Review'] }}
+        </button>
+    </div>
+    </form>
+    </div>
+
+    {% elif current_user.is_authenticated and not has_purchased %}
+    <div style="background: #fff8eb; border-left: 4px solid #f6ad55; padding: 15px; border-radius: 4px; margin-bottom: 30px; font-size: 14px; color: #744210;">
+        <i class="fas fa-info-circle"></i> {{ g.translations['must_purchase_to_review'] }}
+    </div>
+    {% endif %}
+
+    <div class="reviews-list" style="display: grid; gap: 20px;">
+        {% if product.reviews %}
+            {% for review in product.reviews %}
+            <div class="review-card" style="padding: 20px; border: 1px solid #edf2f7; border-radius: 10px; background: white; transition: transform 0.2s;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                    <div>
+                        <div style="font-weight: bold; font-size: 16px; color: #2d3748;">{{ review.user.full_name }}</div>
+                        <div style="display: flex; align-items: center; gap: 5px; margin-top: 4px;">
+                            <span style="color: #ecc94b; font-size: 14px;">
+                                {% for i in range(review.rating) %}★{% endfor %}{% for i in range(5 - review.rating) %}☆{% endfor %}
+                            </span>
+                            <span style="color: #38a169; font-size: 11px; font-weight: bold; background: #f0fff4; padding: 2px 6px; border-radius: 4px;">
+                                <i class="fas fa-check-circle"></i> {{ g.translations['Verified_Purchase'] }}
+                            </span>
+                        </div>
+                    </div>
+                <div style="color: #718096; font-size: 13px; font-weight: 500; letter-spacing: 0.02em;">
+                    {{ review.created_at.strftime('%d-%m-%Y') if review.created_at else '' }}
+                </div>
+                </div>
+                <p style="color: #4a5568; line-height: 1.6; margin: 10px 0 0; font-size: 15px;">
+                    {{ review.review_text }}
+                </p>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div style="text-align: center; padding: 40px; color: #a0aec0;">
+                <i class="fas fa-comment-dots" style="font-size: 40px; margin-bottom: 15px; display: block; opacity: 0.3;"></i>
+                {{ g.translations['No_reviews_yet'] }}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="share-buttons-container">
+    <button id="shareFacebookBtn" class="share-btn facebook-btn">
+        <i class="fab fa-facebook-f"></i> <!-- Facebook Icon -->
+        <span>{{ g.translations['Share_on_Facebook'] }}</span>
+    </button>
+    <button id="copyLinkBtn" class="share-btn copy-link-btn">
+        <i class="fas fa-link"></i> <!-- Link Icon -->
+        <span>{{ g.translations['Copy_P_Link'] }}</span>
+    </button>
+</div>
+
+{% endblock %}
+
+
+{% block additionalscript %}
+
+<script>
+    document.querySelectorAll('.redirect-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            window.location.href = this.getAttribute('data-href');
+        });
+    });
+</script>
+
+
+<script>
+
+    // --- JavaScript for Share Functionality ---
+    document.addEventListener('DOMContentLoaded', function () {
+        const shareFacebookBtn = document.getElementById('shareFacebookBtn');
+        const copyLinkBtn = document.getElementById('copyLinkBtn');
+
+        // 1. Facebook Share Logic
+        if (shareFacebookBtn) {
+            shareFacebookBtn.addEventListener('click', function () {
+                // Get the current page URL
+                const urlToShare = window.location.href;
+
+                // Construct the Facebook share URL
+                const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(urlToShare)}`;
+
+                // Open the share dialog in a new popup window
+                window.open(facebookShareUrl, 'facebook-share-dialog', 'width=800,height=600');
+            });
+        }
+
+        // 2. Copy Link Logic
+        if (copyLinkBtn) {
+            copyLinkBtn.addEventListener('click', function () {
+                // Get the current page URL
+                const urlToCopy = window.location.href;
+
+                // Use the modern Clipboard API to copy the text
+                navigator.clipboard.writeText(urlToCopy).then(() => {
+                    // --- Provide user feedback ---
+                    // Temporarily change the button text to show it worked
+                    const originalText = copyLinkBtn.querySelector('span').textContent;
+                    copyLinkBtn.querySelector('span').textContent = translations['Link_Copied']; // Use translated text
+
+                    // Change it back after a few seconds
+                    setTimeout(() => {
+                        copyLinkBtn.querySelector('span').textContent = originalText;
+                    }, 2000); // 2000ms = 2 seconds
+
+                }).catch(err => {
+                    console.error('Failed to copy link: ', err);
+                    // Optional: Provide an error message to the user
+                    alert(translations['Copy_Failed_Error']);
+                });
+            });
+        }
+    });
+
+
+
+</script>
+
+{% endblock %}

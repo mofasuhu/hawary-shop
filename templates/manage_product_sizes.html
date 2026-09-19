@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}{{ g.translations['Manage_Product_Sizes'] }} - {{ product.name_en if g.current_language == 'en' else product.name_ar }}{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('update') }}" class="back-button">{{ g.translations['Back_to_Product_Update'] }}</a>
+<h1>{{ g.translations['Manage_Sizes_for'] }} "{{ product.name_en if g.current_language == 'en' else product.name_ar }}"</h1>
+
+<div class="form-container">
+<form action="{{ url_for('admin_manage_product_sizes', product_id=product.id) }}" method="post">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<div class="form-group-login-signup">
+<input type="hidden" name="action" value="add_size">
+<input type="text" id="new_size_en" name="size_en"  placeholder="{{ g.translations['New_Product_Size_EN'] }}" required>
+<input type="text" id="new_size_ar" name="size_ar"  placeholder="{{ g.translations['New_Product_Size_AR'] }}" required>
+<input type="text" inputmode="decimal" pattern="^\d*\.?\d*$" class="custom-number-input" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" id="new_price" name="price" step="0.01" min="0.01" placeholder="{{ g.translations['New_Price'] }} ({{ g.translations['EGP'] }})" required>
+<input type="text" inputmode="decimal" pattern="^\d*\.?\d*$" class="custom-number-input" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" id="new_available_quantity" name="available_quantity" min="0" placeholder="{{ g.translations['Available_Quantity'] }}" required>
+
+<input type="text" inputmode="decimal" pattern="^\d*\.?\d*$" class="custom-number-input" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" id="new_weight_kg" name="weight_kg" step="0.01" min="0" placeholder="{{ g.translations['Weight_KG'] }}" required>
+<input type="text" inputmode="decimal" pattern="^\d*\.?\d*$" class="custom-number-input" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" id="new_length_cm" name="length_cm" step="0.01" min="0" placeholder="{{ g.translations['Length_CM'] }}" required>
+<input type="text" inputmode="decimal" pattern="^\d*\.?\d*$" class="custom-number-input" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" id="new_width_cm" name="width_cm" step="0.01" min="0" placeholder="{{ g.translations['Width_CM'] }}" required>
+<input type="text" inputmode="decimal" pattern="^\d*\.?\d*$" class="custom-number-input" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" id="new_height_cm" name="height_cm" step="0.01" min="0" placeholder="{{ g.translations['Height_CM'] }}" required>
+
+<input type="submit" value="{{ g.translations['Add_Size'] }}"></div>
+</form></div><br>
+<h2 style="text-align: center;">{{ g.translations['Existing_Sizes'] }}</h2><br>
+{% if product.sizes %}
+{% for size in product.sizes %}
+<div class="form-container">
+<form action="{{ url_for('admin_manage_product_sizes', product_id=product.id) }}" method="post" class="inline-form">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<div class="form-group-login-signup">
+<input type="hidden" name="action" value="update_size">
+<input type="hidden" name="size_id" value="{{ size.id }}">
+<input type="text" id="edit_size_en_{{ size.id }}" name="size_en" value="{{ size.size_en }}" placeholder="{{ g.translations['New_Product_Size_EN'] }}" required>
+<input type="text" id="edit_size_ar_{{ size.id }}" name="size_ar" value="{{ size.size_ar }}" placeholder="{{ g.translations['New_Product_Size_AR'] }}" required>
+<input type="text" inputmode="decimal" pattern="^\d*\.?\d*$" class="custom-number-input" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" id="edit_price_{{ size.id }}" name="price" value="{{ size.price }}" step="0.01" min="0.01" placeholder="{{ g.translations['New_Price'] }} ({{ g.translations['EGP'] }})" required>
+<input type="text" inputmode="decimal" pattern="^\d*\.?\d*$" class="custom-number-input" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" id="edit_available_quantity_{{ size.id }}" name="available_quantity" value="{{ size.available_quantity }}" min="0" placeholder="{{ g.translations['Available_Quantity'] }}" required>
+
+<input type="text" inputmode="decimal" pattern="^\d*\.?\d*$" class="custom-number-input" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" id="edit_weight_kg_{{ size.id }}" name="weight_kg" value="{{ size.weight_kg }}" step="0.01" min="0" placeholder="{{ g.translations['Weight_KG'] }}" required>
+<input type="text" inputmode="decimal" pattern="^\d*\.?\d*$" class="custom-number-input" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" id="edit_length_cm_{{ size.id }}" name="length_cm" value="{{ size.length_cm }}" step="0.01" min="0" placeholder="{{ g.translations['Length_CM'] }}" required>
+<input type="text" inputmode="decimal" pattern="^\d*\.?\d*$" class="custom-number-input" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" id="edit_width_cm_{{ size.id }}" name="width_cm" value="{{ size.width_cm }}" step="0.01" min="0" placeholder="{{ g.translations['Width_CM'] }}" required>
+<input type="text" inputmode="decimal" pattern="^\d*\.?\d*$" class="custom-number-input" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" id="edit_height_cm_{{ size.id }}" name="height_cm" value="{{ size.height_cm }}" step="0.01" min="0" placeholder="{{ g.translations['Height_CM'] }}" required>
+<p><b>{{ g.translations['Delivery_Factor'] }}:</b> {{ '%.2f' % size.delivery_factor }}</p>
+
+<input type="submit" value="{{ g.translations['Update_Size'] }}"></div>
+</form></div>
+<div class="form-container">
+<form action="{{ url_for('admin_manage_product_sizes', product_id=product.id) }}" method="post" class="inline-form" onsubmit="return confirm('{{ g.translations['Are_you_sure_you_want_to_delete_this_size'] }}');">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<div class="form-group-login-signup">
+<input type="hidden" name="action" value="delete_size">
+<input type="hidden" name="size_id" value="{{ size.id }}">
+<input type="submit" value="{{ g.translations['Delete_Size'] }}" class="delete-button">
+</div>
+</form></div><br>
+{% endfor %}
+{% else %}
+<p style="text-align: center;">{{ g.translations['No_sizes_found_for_this_product'] }}</p>
+{% endif %}
+<br><br><br><br><br><br><br><br>
+{% endblock %}

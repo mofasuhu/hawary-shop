@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}{{ g.translations['Superadmin_Editing_Account'] }}{% endblock %}
+{% block content %}
+<a href="{{ url_for('admin_accounts_manager') }}" class="back-button">{{ g.translations['Back_to_Accounts'] }}</a>
+<h1>{{ g.translations['Superadmin_Editing_Account'] }}</h1>
+<div class="form-container">
+    <form action="{{ url_for('superadmin_edit_account', account_id=client.id) }}" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group-login-signup">
+            <div>
+                <label>{{ g.translations['Full_Name'] }}</label>
+                <input type="text" name="full_name" placeholder="{{ g.translations['Full_Name'] }}" value="{{ client.full_name }}" required>
+            </div>
+            <div>
+                <label>{{ g.translations['Mobile'] }}</label>
+                <input type="text" name="mobile" placeholder="{{ g.translations['Mobile'] }}" value="{{ client.mobile }}" required>
+            </div>
+            <div>
+                <label>{{ g.translations['Area'] }}</label>
+
+<select name="area" id="area-select" required>
+<option disabled selected value="">{{ g.translations['Select_Area'] }}</option>
+{% for gov in governorates %}
+<option value="{{ gov }}" {% if client.area == gov %}selected{% endif %}>
+{{ g.translations[gov] }}
+</option>
+{% endfor %}
+</select>
+                
+                
+            </div>
+            <div>
+                <label>{{ g.translations['Address'] }}</label>
+                <input style="{% if client.address|contains_arabic %}direction: rtl{% else %}direction: ltr{% endif %}" type="text" name="address" placeholder="{{ g.translations['Address'] }}" value="{{ client.address }}" required>
+            </div>
+            <input type="submit" value="{{ g.translations['Update_Account'] }}">
+        </div>
+    </form>
+</div>
+{% endblock %}

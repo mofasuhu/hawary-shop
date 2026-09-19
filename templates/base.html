@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="{{ 'ar' if g.current_language == 'ar' else 'en' }}" class="{{ 'rtl' if g.current_language == 'ar' else '' }}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <link rel="canonical" href="{{ request.base_url }}">
+
+    <meta name="description" content="{% block meta_description %}{% if g.current_language == 'ar' %}تسوق منتجات عالية الجودة من متجر هواري — توصيل داخل مصر.{% else %}Shop quality products at HAWARY SHOP — delivery across Egypt.{% endif %}{% endblock %}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;500;600&family=Noto+Naskh+Arabic:wght@400;600;700&display=swap">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='calendars.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='responsive_styles.css') }}">
+
+
+
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon-96x96_v3.png') }}" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon_v3.svg') }}" />
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon_v3.ico') }}" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon_v3.png') }}" />
+    <meta name="apple-mobile-web-app-title" content="HAWARY" />
+    <link rel="manifest" href="{{ url_for('static', filename='site_v3.webmanifest') }}" />
+
+
+    {% block open_graph_tags %}
+    <meta property="og:title" content="{% block og_title %}HAWARY SHOP | Your Everyday Store{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{% if g.current_language == 'ar' %}تسوق منتجات عالية الجودة من متجر هواري.{% else %}Discover quality products at HAWARY SHOP.{% endif %}{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{{ url_for('static', filename='web-app-manifest-512x512_v3.png', _external=True) }}{% endblock %}">
+    <meta property="og:url" content="{{ request.url }}">
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+    <meta property="og:locale" content="{% block og_locale %}{{ 'ar_EG' if g.current_language == 'ar' else 'en_EG' }}{% endblock %}">
+    <meta property="fb:app_id" content="2352999211761626">
+    {% block og_product_extra %}{% endblock %}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{% block twitter_title %}HAWARY SHOP | Your Everyday Store{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}{% if g.current_language == 'ar' %}تسوق منتجات عالية الجودة من متجر هواري.{% else %}Discover quality products at HAWARY SHOP.{% endif %}{% endblock %}">
+    <meta name="twitter:image" content="{% block twitter_image %}{{ url_for('static', filename='web-app-manifest-512x512_v3.png', _external=True) }}{% endblock %}">
+    {% endblock %}
+
+    <title>{% block title %}{% endblock %}</title>
+
+    {% block head_extra %}{% endblock %}
+</head>
+
+<body>
+    <input type="hidden" id="csrf_token" value="{{ csrf_token() }}">
+
+    <!-- <div id="pwaInterstitial" class="pwa-interstitial-overlay" style="display: none;">
+<div class="pwa-interstitial-content">
+<img src="{{ url_for('static', filename='apple-touch-icon_v3.png') }}" alt="App Icon">
+<h2>{{ g.translations['pwa_open_in_app_title'] }}</h2>
+<p>{{ g.translations['pwa_open_in_app_desc'] }}</p> -->
+
+    <!-- This link uses a special scheme that modern phones understand -->
+    <!-- <a href="#" class="open-in-app-btn">
+{{ g.translations['pwa_open_app_button'] }}
+</a>            
+<a href="intent://hawary.shop#Intent;scheme=https;package=com.android.chrome;end" class="open-in-app-btn">
+{{ g.translations['pwa_open_app_button'] }}
+</a> -->
+
+    <!-- </div></div> -->
+
+
+
+
+
+
+
+
+    <div id="custom-toast" class="custom-toast"></div>
+
+
+    <div id="custom-confirm-modal" class="modal-overlay">
+        <div class="modal-content">
+            <p id="confirm-modal-text"></p>
+            <div class="modal-buttons">
+                <button id="confirm-modal-yes-btn" class="btn btn-danger">{{ g.translations['Yes'] }}</button>
+                <button id="confirm-modal-no-btn" class="btn btn-secondary">{{ g.translations['No'] }}</button>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+    <!-- <header class="top-bar">
+
+        <div class="cafe-name">
+            <a href="{{ url_for('home') }}"><img src="{{ url_for('static', filename='default_v3.svg') }}"
+                    alt="{{ g.translations['top_name'] }}"></a>
+        </div>
+
+
+        <div class="header-navigation">
+
+            {% if not current_user.is_authenticated %}
+            <p class="top-name-text {{ 'ar' if g.current_language == 'ar' else 'en' }}">
+                {{ g.translations['top_name'] }}
+            </p>
+            {% endif %}
+
+
+
+            {% if current_user.role == 'client' %}
+            <a href="{{ url_for('orderhistory_client_viewer') }}">
+                <button title="{{ g.translations['History'] }}" style="
+max-width: 130px;
+min-width: 130px;
+max-height: 55px;
+min-height: 55px;
+font-size:17.5px;
+color:white;
+">
+                    {{ g.translations['History'] }}&#x2000;<i class="fa-solid fa-list-check fa-xl"></i>
+                </button>
+            </a>
+            {% endif %}
+
+        </div>
+
+
+        <div class="user-name">
+
+            {% if current_user.role != 'admin' %}
+            <span class="cart-container">
+                <a
+                    href="{{ url_for('order_client_viewer') if current_user.is_authenticated and current_user.role == 'client' else url_for('login') }}">
+                    <div class="cart-icon">
+                        <i class="fas fa-shopping-cart" title="{{ g.translations['Cart'] }}"></i>
+                        <span class="cart-count">{{ cart_count }}</span>
+                    </div>
+                </a>
+            </span>
+            {% endif %}
+
+        </div>
+
+    </header> -->
+
+    <header class="top-bar">
+
+        <div class="topbar-img-stage">
+            <div class="topbar-img-track track-ltr">
+                {% for product in g.hero_products %}
+                <img src="{{ product.image_url if product.image_url.startswith('http') else url_for('static', filename=product.image_url) }}"
+                    alt="" aria-hidden="true" loading="eager">
+                {% endfor %}
+                {# Duplicate for seamless infinite loop #}
+                {% for product in g.hero_products %}
+                <img src="{{ product.image_url if product.image_url.startswith('http') else url_for('static', filename=product.image_url) }}"
+                    alt="" aria-hidden="true" loading="eager">
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="topbar-overlay"></div>
+
+        <div class="top-bar-content">
+
+
+
+            <div class="cafe-name">
+                <a href="{{ url_for('home') }}"><img src="{{ url_for('static', filename='default_v3.svg') }}"
+                        alt="{{ g.translations['top_name'] }}"></a>
+            </div>
+
+
+            <div class="header-navigation">
+
+                {% if not current_user.is_authenticated %}
+                <p class="top-name-text {{ 'ar' if g.current_language == 'ar' else 'en' }}">
+                    {{ g.translations['top_name'] }}
+                </p>
+                {% endif %}
+
+
+
+                {% if current_user.role == 'client' %}
+                <a href="{{ url_for('orderhistory_client_viewer') }}">
+                    <button title="{{ g.translations['History'] }}" style="
+max-width: 130px;
+min-width: 130px;
+max-height: 55px;
+min-height: 55px;
+font-size:17.5px;
+color:white;
+">
+                        {{ g.translations['History'] }}&#x2000;<i class="fa-solid fa-list-check fa-xl"></i>
+                    </button>
+                </a>
+                {% endif %}
+
+            </div>
+
+
+            <div class="user-name">
+
+                {% if current_user.role != 'admin' %}
+                <span class="cart-container">
+                    <a
+                        href="{{ url_for('order_client_viewer') if current_user.is_authenticated and current_user.role == 'client' else url_for('login') }}">
+                        <div class="cart-icon">
+                            <i class="fas fa-shopping-cart" title="{{ g.translations['Cart'] }}"></i>
+                            <span class="cart-count">{{ cart_count }}</span>
+                        </div>
+                    </a>
+                </span>
+                {% endif %}
+
+            </div>
+
+
+
+
+        </div>
+
+    </header>
+
+
+
+
+
+
+    <main class="content">
+
+        <div class="home-shortcuts">
+
+            <button id="installAppBtn" title="{{ g.translations['Install_App'] }}" style="
+width: 50px;
+height: 40px;
+font-size:15px;
+color: #36454F;
+display: none;
+background: white;
+border: 1px solid #ddd;
+">
+                <i class="fa-solid fa-download fa-2xl"></i>
+            </button>
+
+
+
+            <div class="lang-container">
+                <form action="{{ url_for('set_language_route', lang='') }}" method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="form-group-lang">
+                        <select name="lang"
+                            onchange="window.location.href='{{ url_for('set_language_route', lang='') }}' + this.value;"
+                            aria-label="Select Language">
+                            <option value="en" {% if g.current_language=='en' %}selected{% endif %}style="direction: ltr;">e&#127760;</option>
+                            <option value="ar" {% if g.current_language=='ar' %}selected{% endif %} style="direction: rtl;">&#127760;ع</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+
+
+
+
+            {% if not current_user.is_authenticated %}
+            <a href="{{ url_for('signup') }}" aria-label="{{ g.translations['logup'] }}">
+                <!-- <button>{{ g.translations['logup'] }}</button> -->
+                <button title="{{ g.translations['logup'] }}" style="
+width: 50px;
+height: 40px;
+font-size:15px;
+color: #36454F;
+background: white;
+border: 1px solid #ddd;
+">
+                    <i class="fa-solid fa-user-plus fa-2xl"></i>
+                </button>
+            </a>
+
+            <a href="{{ url_for('login') }}" aria-label="{{ g.translations['login'] }}">
+                <!-- <button>{{ g.translations['login'] }}</button> -->
+                <button title="{{ g.translations['login'] }}" style="
+width: 50px;
+height: 40px;
+font-size:15px;
+color: #36454F;
+background: white;
+border: 1px solid #ddd;
+">
+                    <i
+                        class="{{ 'fa-solid fa-arrow-right-to-bracket fa-2xl fa-flip-horizontal' if g.current_language == 'en' else 'fa-solid fa-arrow-right-to-bracket fa-2xl' }}"></i>
+                </button>
+            </a>
+            {% endif %}
+
+
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('currentuser_profile_editing', referrer=request.path) }}"
+                aria-label="{{ g.translations['Edit_Profile'] }}">
+                <!-- <button>{{ g.translations['Edit_Profile'] }}</button> -->
+                <button title="{{ g.translations['Edit_Profile'] }}" style="
+width: 50px;
+height: 40px;
+font-size:15px;
+color: #36454F;
+background: white;
+border: 1px solid #ddd;
+">
+                    <i class="fa-solid fa-user-pen fa-2xl"></i>
+                </button>
+            </a>
+
+            {% if current_user.role != 'admin' %}
+            <a href="{{ url_for('wishlist') }}" aria-label="{{ g.translations['Wishlist'] }}">
+                <button title="{{ g.translations['Wishlist'] }}" style="
+width: 50px;
+height: 40px;
+font-size:15px;
+color: #36454F;
+background: white;
+border: 1px solid #ddd;
+">
+                    <i class="fa-solid fa-heart fa-2xl" style="color: red;"></i>
+                </button>
+            </a>
+            {% endif %}
+
+
+            <a href="{{ url_for('logout') }}" aria-label="{{ g.translations['logout'] }}">
+                <!-- <button>{{ g.translations['logout'] }}</button> -->
+                <button title="{{ g.translations['logout'] }}" style="
+width: 50px;
+height: 40px;
+font-size:15px;
+color: #36454F;
+background: white;
+border: 1px solid #ddd;
+">
+                    <i
+                        class="{{ 'fa-solid fa-arrow-right-from-bracket fa-2xl fa-flip-horizontal' if g.current_language == 'ar' else 'fa-solid fa-arrow-right-from-bracket fa-2xl' }}"></i>
+                </button>
+            </a>
+            {% endif %}
+
+
+
+        </div>
+
+
+        <div class="top-navigation">
+            {% if current_user.is_authenticated and current_user.role == 'admin' %}
+            <a href="{{ url_for('add') }}"><button>{{ g.translations['Add_Prod'] }}</button></a>
+            <a href="{{ url_for('remove') }}"><button>{{ g.translations['Remove_Prod'] }}</button></a>
+            <a href="{{ url_for('update') }}"><button>{{ g.translations['Update_Prod'] }}</button></a>
+            <a href="{{ url_for('admin_accounts_manager') }}"><button>{{ g.translations['Accounts'] }}</button></a>
+            <a href="{{ url_for('orders_admin_viewer') }}"><button>{{ g.translations['Orders'] }}</button></a><br>
+            <a href="{{ url_for('admin_transactions') }}"><button>{{ g.translations['Transactions'] }}</button></a>
+            <a href="{{ url_for('admin_reports') }}"><button>{{ g.translations['Sales'] }}</button></a>
+            <!-- <a href="{{ url_for('download_excel') }}"><button>{{ g.translations['Prods_Excel'] }}</button></a>
+<a href="{{ url_for('download_json') }}"><button>{{ g.translations['Prods_Json'] }}</button></a> -->
+            <a href="{{ url_for('download_db_files') }}"><button>{{ g.translations['DB_Files'] }}</button></a>
+            <a href="{{ url_for('create_a_translation_item') }}"><button>{{ g.translations['Translation']
+                    }}</button></a>
+            <a href="{{ url_for('admin_wishlists') }}"><button>{{ g.translations['Wishlists'] }}</button></a>
+            {% endif %}
+        </div>
+
+
+        {% block flash_messages %}
+        {% if get_flashed_messages(with_categories=True) %}
+        <ul class="flashes">
+            {% for category, message in get_flashed_messages(with_categories=True) %}
+            {% if category in ['danger', 'success'] %}
+            <li class="{{ category }}">
+                <span class="flash-icon">
+                    {% if category == 'success' %}✅{% elif category == 'danger' %}⚠️{% endif %}
+                </span>
+                <span class="flash-message">{{ message }}</span>
+                <span class="flash-close" title="Close">&times;</span>
+            </li>
+            {% endif %}
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endblock %}
+
+
+
+
+        {% block content %}{% endblock %}
+
+
+    </main>
+
+    <footer class="footer">
+
+        <!-- <div class="footer-img-stage">
+            <div class="footer-img-track track-ltr">
+                {% for product in g.hero_products %}
+                <img src="{{ product.image_url if product.image_url.startswith('http') else url_for('static', filename=product.image_url) }}"
+                    alt="" aria-hidden="true" loading="eager">
+                {% endfor %}
+                {# Duplicate for seamless infinite loop #}
+                {% for product in g.hero_products %}
+                <img src="{{ product.image_url if product.image_url.startswith('http') else url_for('static', filename=product.image_url) }}"
+                    alt="" aria-hidden="true" loading="eager">
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="footer-overlay"></div> -->
+
+
+
+        <div class="footer-container">
+
+            <div class="footer-section">
+                <h3>{{ g.translations['Company_Address'] }}</h3>
+                <p>{{ g.translations['City_Name'] }}{{ g.translations['comma'] }} {{ g.translations['Country'] }}</p>
+            </div>
+
+            <div class="footer-section">
+                <h3>{{ g.translations['About_Us'] }}</h3>
+                {% if g.current_language == 'ar' %}
+                <a href="{{ url_for('about_us') }}" class="about_us"><img
+                        src="{{ url_for('static', filename='default_v3_offwhite.svg') }}"
+                        class="footer-icon">&#x2000;اعرف المزيد
+                    عنا</a>
+                {% else %}
+                <a href="{{ url_for('about_us') }}"><a href="{{ url_for('about_us') }}" class="about_us"><img
+                            src="{{ url_for('static', filename='default_v3_offwhite.svg') }}"
+                            class="footer-icon">&#x2000;Learn More About Us</a>
+                    {% endif %}
+            </div>
+
+            <!-- <div class="footer-section">
+<h3>{{ g.translations['Legal'] }}</h3>
+<a href="{{ url_for('privacy_policy') }}" class="footer-link">{{ g.translations['Privacy_Policy'] }}</a>
+</div> -->
+            <div class="footer-section">
+                <h3>{{ g.translations['Legal'] }}</h3>
+                <p><a href="{{ url_for('privacy_policy') }}" class="footer-link">{{ g.translations['Privacy_Policy']
+                        }}</a></p>
+                <p><a href="{{ url_for('refund_policy') }}" class="footer-link">{{ g.translations['Refund_Policy']
+                        }}</a></p>
+                <p><a href="{{ url_for('shipping_policy') }}" class="footer-link">{{ g.translations['Shipping_Policy']
+                        }}</a></p>
+                <p><a href="{{ url_for('terms_and_conditions') }}" class="footer-link">{{
+                        g.translations['Terms_and_Conditions'] }}</a></p>
+            </div>
+
+
+            <div class="footer-section">
+                <h3>{{ g.translations['Contact_Us'] }}</h3>
+                <p dir="ltr"><a href="https://wa.me/201014332694" dir="ltr"><i
+                            class="fa-brands">&#xf232;&#x2000;</i></a><a href="https://wa.me/201014332694"
+                        dir="ltr">+201014332694</a></p>
+                <p dir="ltr"><a href="mailto:mofasuhu@gmail.com" dir="ltr"><i
+                            class="fa-regular">&#xf0e0;&#x2000;</i></a><a href="mailto:mofasuhu@gmail.com"
+                        dir="ltr">mofasuhu@gmail.com</a></p>
+            </div>
+
+            <!-- <div class="footer-section">
+<h3>{{ g.translations['Write_To_Us'] }}</h3>
+
+</div> -->
+
+
+            <div class="footer-section">
+                <h3>{{ g.translations['Follow_Us'] }}</h3>
+                <div class="social-icons">
+                    <!-- <a href="https://www.instagram.com/"><i class="fa-brands">&#xf16d;&#x2000;</i></a> -->
+                    <a href="https://www.facebook.com/hawaryshop"><i class="fa-brands">&#xf09a;&#x2000;</i></a>
+                    <!-- <a href="https://twitter.com"><i class="fa-brands">&#xe61b;</i></a> -->
+                </div>
+            </div>
+
+        </div>
+
+        <div class="footer-copyright">
+            {% if g.current_language == 'ar' %}
+            <p><span class="copyright-symbol">&copy;</span> 2026 متجر هواري. جميع الحقوق محفوظة</p>
+            {% else %}
+            <p><span class="copyright-symbol">&copy;</span> 2026 HAWARY SHOP. All Rights Reserved</p>
+            {% endif %}
+        </div>
+    </footer>
+
+
+
+
+
+    {% block additionalscript %}{% endblock %}
+
+
+
+
+
+    <script src="{{ url_for('static', filename='calendars.js') }}"></script>
+    <script src="{{ url_for('static', filename='order.js') }}"></script>
+    <script src="{{ url_for('static', filename='wishlist.js') }}"></script>
+    <script>
+
+        var translations = {{ g.translations | tojson }};
+        var currentLanguage = {{ g.current_language | tojson }};
+        var alltranslations = {{ g.all_translations | tojson }};
+        var product_names = {{ g.product_names | tojson }};
+        var hero_products = {{ g.hero_products | tojson }};
+        var rowCounter = 0;
+
+        document.addEventListener('DOMContentLoaded', function () {
+
+            function isFacebookApp() {
+                var userAgent = navigator.userAgent || navigator.vendor || window.opera;
+                return (userAgent.indexOf('FBAN') > -1) || (userAgent.indexOf('FBAV') > -1);
+            }
+
+            function isInstagramApp() {
+                var userAgent = navigator.userAgent || navigator.vendor || window.opera;
+                return userAgent.includes("Instagram");
+            }
+
+            if (isFacebookApp() || isInstagramApp()) {
+                var browserWarning = document.getElementById('browser-warning');
+                if (browserWarning) {
+                    browserWarning.style.display = 'flex';
+                }
+            }
+
+        });
+
+        function copyLink() {
+            var linkText = document.getElementById("linkText").innerText;
+            navigator.clipboard.writeText(linkText).then(function () {
+                alert(translations["copied"]);
+            }, function (err) {
+                alert(translations["failed_to_copy"]);
+            });
+        }
+
+
+    </script>
+
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const installButton = document.getElementById('installAppBtn');
+            // const interstitial = document.getElementById('pwaInterstitial');
+            // const openInAppButton = interstitial ? interstitial.querySelector('.open-in-app-btn') : null;
+            let deferredPrompt;
+
+            // State variables
+            let isAppInstallable = false;
+            let hasCheckedInstallStatus = false;
+
+            // Function to check if we're in standalone mode (PWA is running)
+            const isRunningStandalone = () => {
+                return window.matchMedia('(display-mode: standalone)').matches ||
+                    window.navigator.standalone === true;
+            };
+
+            // Function to check if we're on mobile
+            const isMobileDevice = () => {
+                return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            };
+
+            // // Function to show the interstitial overlay
+            // const showInterstitial = () => {
+            //     if (interstitial && isMobileDevice() && !isRunningStandalone()) {
+            //         console.log('Showing PWA interstitial overlay');
+            //         interstitial.style.display = 'flex';
+
+            //         // Update the open-in-app button to use the PWA start_url
+            //         // if (openInAppButton) {
+            //         //     // Based on your manifest, the start_url is "/"
+            //         //     // This should open in the installed PWA if it's installed
+            //         //     openInAppButton.href = window.location.origin + '/';
+            //         //     
+            //         //     // Make sure the link opens in the same window/tab
+            //         //     openInAppButton.target = '_self';
+            //         // }
+            //     }
+            // };
+
+            // // Function to hide the interstitial overlay
+            // const hideInterstitial = () => {
+            //     if (interstitial) {
+            //         interstitial.style.display = 'none';
+            //     }
+            // };
+
+            // Function to show the install button
+            const showInstallButton = () => {
+                if (installButton) {
+                    installButton.style.display = 'block';
+                    console.log('Install button shown');
+                }
+            };
+
+            // Function to hide the install button
+            const hideInstallButton = () => {
+                if (installButton) {
+                    installButton.style.display = 'none';
+                    console.log('Install button hidden');
+                }
+            };
+
+            // Function to check PWA installation status
+            const checkPWAStatus = () => {
+                if (hasCheckedInstallStatus) return;
+                hasCheckedInstallStatus = true;
+
+                // If we're running in standalone mode, hide install button and don't show interstitial
+                if (isRunningStandalone()) {
+                    console.log('Running in standalone mode - PWA is active');
+                    hideInstallButton();
+                    // hideInterstitial();
+                    return;
+                }
+
+                // If beforeinstallprompt hasn't fired and we're not standalone, assume the app is installed but running in browser
+                if (!isAppInstallable && isMobileDevice()) {
+                    console.log('PWA appears to be installed but running in browser');
+                    hideInstallButton();
+                    // showInterstitial();
+                } else if (isAppInstallable) {
+                    console.log('PWA is installable');
+                    showInstallButton();
+                    // hideInterstitial();
+                }
+            };
+
+            // Listen for the 'beforeinstallprompt' event
+            window.addEventListener('beforeinstallprompt', (e) => {
+                console.log('beforeinstallprompt event fired - PWA is installable');
+                e.preventDefault();
+                deferredPrompt = e;
+                isAppInstallable = true;
+                showInstallButton();
+                // hideInterstitial();
+            });
+
+            // Listen for successful app installation
+            window.addEventListener('appinstalled', (e) => {
+                console.log('PWA was successfully installed');
+                isAppInstallable = false;
+                hideInstallButton();
+
+                // // Small delay before showing interstitial to allow for any UI updates
+                // setTimeout(() => {
+                //     if (!isRunningStandalone()) {
+                //         showInterstitial();
+                //     }
+                // }, 20000);
+            });
+
+            // Install button click handler
+            if (installButton) {
+                installButton.addEventListener('click', async () => {
+                    if (deferredPrompt) {
+                        console.log('Triggering install prompt');
+                        deferredPrompt.prompt();
+                        const { outcome } = await deferredPrompt.userChoice;
+                        console.log(`User response to install prompt: ${outcome}`);
+
+                        if (outcome === 'accepted') {
+                            hideInstallButton();
+                        }
+
+                        deferredPrompt = null;
+                    }
+                });
+            }
+
+            // // Handle open-in-app button click
+            // if (openInAppButton) {
+            //     openInAppButton.addEventListener('click', (e) => {
+            //         // Let the browser handle the navigation naturally
+            //         // The href should already be set to the correct URL
+            //         console.log('Open in app button clicked, navigating to:', openInAppButton.href);
+            //     });
+            // }
+
+            // // Close interstitial when clicking outside the content
+            // // if (interstitial) {
+            // //     interstitial.addEventListener('click', (e) => {
+            // //         if (e.target === interstitial) {
+            // //             hideInterstitial();
+            // //         }
+            // //     });
+            // // }
+
+            // Check PWA status after a short delay to allow all events to register
+            setTimeout(checkPWAStatus, 10000);
+
+            // Also check when the page becomes visible (in case user switches tabs)
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) {
+                    setTimeout(checkPWAStatus, 5000);
+                }
+            });
+        });
+    </script>
+
+
+
+</body>
+
+</html>

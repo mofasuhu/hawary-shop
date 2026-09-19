@@ -1,0 +1,452 @@
+[
+  {
+    "path": "/",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/Y5ejzepXb3XTYeeL2I81Fv4yFjhorl1Kp4gAH6waxFo553Ch88K7nWDJlPAHEHm9",
+    "methods": [
+      "POST"
+    ]
+  },
+  {
+    "path": "/about_us",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/add",
+    "methods": [
+      "GET",
+      "POST"
+    ]
+  },
+  {
+    "path": "/admin/accounts",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/admin/accounts/delete/<int:account_id>",
+    "methods": [
+      "POST"
+    ]
+  },
+  {
+    "path": "/admin/accounts/edit/<int:account_id>",
+    "methods": [
+      "GET",
+      "POST"
+    ]
+  },
+  {
+    "path": "/admin/accounts/superadmin_delete_admin/<int:client_id>",
+    "methods": [
+      "POST"
+    ]
+  },
+  {
+    "path": "/admin/download_db_files",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/admin/download_products_excel",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/admin/download_products_json",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/admin/download_promocodes",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/admin/generate_promocodes",
+    "methods": [
+      "POST"
+    ]
+  },
+  {
+    "path": "/admin/orders",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/admin/orders/admin_add_product_to_order/<int:order_id>",
+    "methods": [
+      "POST"
+    ]
+  },
+  {
+    "path": "/admin/orders/delete/<int:order_id>",
+    "methods": [
+      "POST"
+    ]
+  },
+  {
+    "path": "/admin/orders/edit/<int:order_id>",
+    "methods": [
+      "GET",
+      "POST"
+    ]
+  },
+  {
+    "path": "/admin/orders/update_status/<int:order_id>",
+    "methods": [
+      "POST"
+    ]
+  },
+  {
+    "path": "/admin/products/manage_sizes/<int:product_id>",
+    "methods": [
+      "GET",
+      "POST"
+    ]
+  },
+  {
+    "path": "/admin/refund_order/<int:transaction_id>",
+    "methods": [
+      "POST"
+    ]
+  },
+  {
+    "path": "/admin/reports",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/admin/reports/download",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/admin/transactions",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/admin/transactions/download",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/admin/wishlists",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/api/product/<int:product_id>/sizes",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/apply_promocode",
+    "methods": [
+      "POST"
+    ]
+  },
+  {
+    "path": "/clear_order",
+    "methods": [
+      "POST"
+    ]
+  },
+  {
+    "path": "/complete-profile",
+    "methods": [
+      "GET",
+      "POST"
+    ]
+  },
+  {
+    "path": "/confirm/<token>",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/create-translation",
+    "methods": [
+      "GET",
+      "POST"
+    ]
+  },
+  {
+    "path": "/currentuser_profile_editing",
+    "methods": [
+      "GET",
+      "POST"
+    ]
+  },
+  {
+    "path": "/download_accounts_data",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/download_orders_data",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/get_order_summary",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/google/callback",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/google/login",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/googlec0366ebe098eff87.html",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/home",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/login",
+    "methods": [
+      "GET",
+      "POST"
+    ]
+  },
+  {
+    "path": "/logout",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/order_client_viewer",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/ordercard_minus_button",
+    "methods": [
+      "POST"
+    ]
+  },
+  {
+    "path": "/ordercard_plus_button",
+    "methods": [
+      "POST"
+    ]
+  },
+  {
+    "path": "/orderhistory_client_viewer",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/orders/client_cancel_order/<int:order_id>",
+    "methods": [
+      "POST"
+    ]
+  },
+  {
+    "path": "/orders/edit/<int:order_id>",
+    "methods": [
+      "GET",
+      "POST"
+    ]
+  },
+  {
+    "path": "/paymob_redirect_handler",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/privacy-policy",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/product/<int:product_id>",
+    "methods": [
+      "GET",
+      "POST"
+    ]
+  },
+  {
+    "path": "/product/<int:product_id>/review",
+    "methods": [
+      "POST"
+    ]
+  },
+  {
+    "path": "/refund-policy",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/remove",
+    "methods": [
+      "GET",
+      "POST"
+    ]
+  },
+  {
+    "path": "/remove_from_cart",
+    "methods": [
+      "POST"
+    ]
+  },
+  {
+    "path": "/reset_password/<token>",
+    "methods": [
+      "GET",
+      "POST"
+    ]
+  },
+  {
+    "path": "/reset_password_request",
+    "methods": [
+      "GET",
+      "POST"
+    ]
+  },
+  {
+    "path": "/robots.txt",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/send_order",
+    "methods": [
+      "POST"
+    ]
+  },
+  {
+    "path": "/set_language/<lang>",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/setup_2fa",
+    "methods": [
+      "GET",
+      "POST"
+    ]
+  },
+  {
+    "path": "/shipping-policy",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/signup",
+    "methods": [
+      "GET",
+      "POST"
+    ]
+  },
+  {
+    "path": "/sitemap.xml",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/superadmin_admin_signup",
+    "methods": [
+      "GET",
+      "POST"
+    ]
+  },
+  {
+    "path": "/terms-and-conditions",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/test-time",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/update",
+    "methods": [
+      "GET",
+      "POST"
+    ]
+  },
+  {
+    "path": "/update_cart_quantity",
+    "methods": [
+      "POST"
+    ]
+  },
+  {
+    "path": "/verify_2fa",
+    "methods": [
+      "GET",
+      "POST"
+    ]
+  },
+  {
+    "path": "/wishlist",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "path": "/wishlist/add/<int:product_id>",
+    "methods": [
+      "POST"
+    ]
+  },
+  {
+    "path": "/wishlist/remove/<int:product_id>",
+    "methods": [
+      "POST"
+    ]
+  }
+]

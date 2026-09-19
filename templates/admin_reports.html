@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% block title %}{{ g.translations['Sales_Report'] }}{% endblock %}
+{% block content %}
+
+<style>
+    table thead th { background-color: #36454F; color: white; }
+    tbody tr:hover { background-color: lightblue; }
+    .pagination { margin-top: 20px; text-align: center; }
+    .pagination a, .pagination span { margin: 0 5px; padding: 8px 12px; text-decoration: none; border: 1px solid #ddd; color: #337ab7; border-radius: 4px; }
+    .pagination .disabled { color: #777; pointer-events: none; background-color: #f5f5f5; }
+    .pagination .active { font-weight: bold; color: white; background-color: #337ab7; border-color: #337ab7; }
+</style>
+
+
+<a href="{{ url_for('home') }}" class="back-button">{{ g.translations['Back_to_Home'] }}</a>
+<h1>{{ g.translations['Sales_Report'] }}</h1>
+
+<div class="form-container">
+<form action="{{ url_for('admin_reports') }}" method="get">
+<div class="form-group">
+    {{ g.translations['Status'] }} 
+    <select name="status">
+        <option value="" {% if not request.args.get('status', '' ) %}selected{% endif %}>{{ g.translations['All'] }}</option>
+        <option value="Pending" {% if request.args.get('status', '' )=='Pending' %}selected{% endif %}>{{ g.translations['Pending'] }}</option>
+        <option value="Preparing" {% if request.args.get('status', '' )=='Preparing' %}selected{% endif %}>{{ g.translations['Preparing'] }}</option>
+        <option value="Delivering" {% if request.args.get('status', '' )=='Delivering' %}selected{% endif %}>{{ g.translations['Delivering'] }}</option>
+        <option value="Delivered" {% if request.args.get('status', '' )=='Delivered' %}selected{% endif %}>{{ g.translations['Delivered'] }}</option>
+        <option value="Cancelled" {% if request.args.get('status', '' )=='Cancelled' %}selected{% endif %}>{{ g.translations['Cancelled'] }}</option>
+    </select>
+</div>
+
+<div class="form-group">
+    {{ g.translations['Payment_Method'] }} 
+    <select name="payment_method">
+        <option value="" {% if not request.args.get('payment_method', '' ) %}selected{% endif %}>{{ g.translations['All'] }}</option>
+        <option value="Bank Card" {% if request.args.get('payment_method', '' )=='Bank Card' %}selected{% endif %}>{{ g.translations['Bank_Card'] }}</option>
+        <option value="Cash on Delivery" {% if request.args.get('payment_method', '' )=='Cash on Delivery' %}selected{% endif %}>{{ g.translations['Cash_on_Delivery'] }}</option>
+    </select>
+</div>
+
+<div class="form-group">
+    {{ g.translations['From'] }} 
+    <input type="date" id="start_date" class="date-picker" name="start_date" placeholder="{{ g.translations['Start_Date'] }}"
+    value="{{ start_date | to_cairo_time | dateformat if request.args.get('start_date', None) else '' }}">
+</div>
+
+<div class="form-group">
+    {{ g.translations['To'] }} 
+    <input type="date" id="end_date" class="date-picker" name="end_date" placeholder="{{ g.translations['End_Date'] }}"
+    value="{{ end_date | to_cairo_time | dateformat if request.args.get('end_date', None) else '' }}">
+</div>
+
+<div class="form-group">
+    <br><input type="submit" value="{{ g.translations['Filter'] }}">
+</div>
+
+    <div class="form-group">
+        <br><button type="button" id="reset-button">{{ g.translations['Reset'] }}</button>
+    </div>
+</form>
+
+<a href="{{ url_for('download_report', status=status, payment_method=payment_method, start_date=start_date | to_cairo_time | dateformat if start_date else '', end_date=end_date | to_cairo_time | dateformat if end_date else '') }}">
+<div class="form-group">
+<br><input type="submit" value="{{ g.translations['Download'] }}">
+</div>
+</a>
+
+</div>
+
+<table>
+<thead>
+<tr>
+    <th>{{ g.translations['Product_Name'] }}</th>
+    <th>{{ g.translations['Product_Size'] }}</th>
+    <th>{{ g.translations['Quantity'] }}</th>
+    <th>{{ g.translations['Total_Price'] }} ({{ g.translations['EGP'] }})</th>
+    <th>{{ g.translations['Payment_Method'] }}</th>
+    <th>{{ g.translations['Status'] }}</th>
+</tr>
+</thead>
+<tbody>
+{% for row in results %}
+<tr>
+    <td>{{ row.product_name }}</td>
+    <td>{{ row.product_size }}</td>
+    <td>{{ row.total_quantity }}</td>
+    <td>{{ '%.2f' % row.total_price }}</td>
+    <td>{% if payment_method %}{{ g.translations[payment_method.replace(' ','_')] }}{% else %}{{ g.translations['All'] }}{% endif %}</td>
+    <td>{% if status %}{{ g.translations[status] }}{% else %}{{ g.translations['All'] }}{% endif %}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+
+
+<div class="pagination">
+    <a href="{{ url_for('admin_reports', page=pagination.prev_num, start_date=request.args.get('start_date'), end_date=request.args.get('end_date'), status=request.args.get('status'), payment_method=request.args.get('payment_method')) if pagination.has_prev else '#' }}"
+       class="{{ 'disabled' if not pagination.has_prev }}">&#8249; {{ g.translations['Previous'] }}</a>
+    {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=1) %}
+        {% if page_num %}
+            <a href="{{ url_for('admin_reports', page=page_num, start_date=request.args.get('start_date'), end_date=request.args.get('end_date'), status=request.args.get('status'), payment_method=request.args.get('payment_method')) }}"
+               class="{{ 'active' if page_num == pagination.page else '' }}">{{ page_num }}</a>
+        {% else %}
+            <span class="disabled">...</span>
+        {% endif %}
+    {% endfor %}
+    <a href="{{ url_for('admin_reports', page=pagination.next_num, start_date=request.args.get('start_date'), end_date=request.args.get('end_date'), status=request.args.get('status'), payment_method=request.args.get('payment_method')) if pagination.has_next else '#' }}"
+       class="{{ 'disabled' if not pagination.has_next }}">{{ g.translations['Next'] }} &#8250;</a>
+</div>
+
+
+
+
+<script>
+    document.getElementById('reset-button').addEventListener('click', function() {
+        window.location.href = "{{ url_for('admin_reports') }}";
+    });
+</script>
+{% endblock %}

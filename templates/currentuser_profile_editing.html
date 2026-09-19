@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}{{ g.translations['Edit_Profile'] }}{% endblock %}
+{% block content %}
+<a href="{{ url_for('home') }}" class="back-button">{{ g.translations['Back_to_Home'] }}</a>
+<h1>{{ g.translations['Edit_Profile'] }}</h1>
+<div class="form-container">
+<form action="{{ url_for('currentuser_profile_editing', referrer=referrer) }}" method="post" autocomplete="off" 
+onsubmit="if (document.getElementById('password').value === '' && document.getElementById('confirm_password').value === '') return true; return validateAndConfirmPassword();">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<div class="form-group-login-signup">
+<div>
+<label for="full_name">{{ g.translations['Full_Name'] }}</label>
+<input  id="full_name" type="text" name="full_name" placeholder="{{ g.translations['Full_Name'] }}" value="{{ current_user.full_name }}"
+required><br>
+</div>
+<div>
+<label for="mobile">{{ g.translations['Mobile'] }}</label>
+<input id="mobile" type="text" name="mobile" placeholder="{{ g.translations['Mobile'] }}" value="{{ current_user.mobile }}"
+required><br>
+</div>
+
+<div>
+<label for="area-select">{{ g.translations['Area'] }}</label>
+<select name="area" id="area-select" required>
+  <option disabled selected value="">{{ g.translations['Select_Area'] }}</option>
+  {% for gov in governorates %}
+    <option value="{{ gov }}" {% if current_user.area == gov %}selected{% endif %}>
+      {{ g.translations[gov] }}
+    </option>
+  {% endfor %}
+</select><br>
+</div>
+
+<div>
+<label for="address">{{ g.translations['Address'] }}</label>
+<input id="address" style="{% if current_user.address|contains_arabic %}direction: rtl{% else %}direction: ltr{% endif %}" type="text" name="address" placeholder="{{ g.translations['Address'] }}" value="{{ current_user.address }}"
+required autocomplete="street-address"><br>
+</div>
+{% if current_user.role == 'client' %}
+<div>
+<label for="last_payment_method">{{ g.translations['Payment_Method'] }}</label>
+<select id="last_payment_method" name="last_payment_method">
+<option value="" disabled selected></option>
+<option value="Bank Card" {% if current_user.last_payment_method == 'Bank Card' %}selected{% endif %}>{{ g.translations['Bank_Card'] }}</option>
+<option value="Cash on Delivery" {% if current_user.last_payment_method == 'Cash on Delivery' %}selected{% endif %}>{{ g.translations['Cash_on_Delivery'] }}</option>
+</select><br>
+</div>
+{% endif %}
+
+
+
+<!-- <div>
+<label for="password">{{ g.translations['Enter_new_password'] }} ({{ g.translations['optional'] }})</label>
+<input type="password" id="password" name="new_password" placeholder="{{ g.translations['Enter_new_password'] }}" autocomplete="new-password"><br>
+</div>
+<div>
+<label for="confirm_password">{{ g.translations['Confirm_new_password'] }}</label>
+<input type="password" id="confirm_password" name="confirm_password" placeholder="{{ g.translations['Confirm_new_password'] }}" autocomplete="new-password"><br>
+<span id="passwordMessage"></span><br>
+</div> -->
+   
+<br><a href="{{ url_for('reset_password_request') }}" class="redirect-button">&#x2001;{{ g.translations['Want_Change_Password'] }}</a><br><br>
+
+   
+   
+<input type="submit" value="{{ g.translations['Update_Profile'] }}">
+</div>
+</form>
+</div>
+{% endblock %}

@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+{% block title %}{{ g.translations['Orders_History'] }}{% endblock %}
+{% block content %}
+
+<style>
+/* Row background coloring based on status */
+tr[data-status="Pending"] {
+    background-color: #fff8dc;
+}
+tr[data-status="Preparing"] {
+    background-color: #e6f0ff;
+}
+tr[data-status="Delivering"] {
+    background-color: #ffe5cc;
+}
+tr[data-status="Delivered"] {
+    background-color: #e6ffe6;
+}
+tr[data-status="Cancelled"] {
+    background-color: #ffe6e6;
+}
+
+/* Status badge styling */
+.status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 0.9em;
+    font-weight: bold;
+    color: white;
+}
+.status-pending { background-color: #ffcc00; }
+.status-preparing { background-color: #3399ff; }
+.status-delivering { background-color: #ff9933; }
+.status-delivered { background-color: #33cc66; }
+.status-cancelled { background-color: #ff4d4d; }
+
+table th {
+    background-color: #36454F;
+    color: white;
+    font-weight: bold;
+    padding: 12px 8px;
+    text-align: center;
+    font-size: 1em;
+    
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);    
+}
+
+tr:hover {
+    filter: brightness(0.97);
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+td, th {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+th.sortable {
+    cursor: pointer;
+    position: relative;
+}
+
+th.sortable::after {
+    content: ' ⇅';
+    font-size: 1em; /* Slightly larger */
+    color: #ffcc00; /* Bright color for contrast */
+    font-weight: bold;
+    margin-left: 5px;
+    opacity: 0.9;
+    transition: transform 0.2s ease, color 0.2s ease;
+}    
+
+th.sortable:hover::after {
+    color: #ffd700; /* Gold-ish on hover */
+    transform: scale(1.2);
+}    
+    
+th.sortable:hover {
+    background-color: #34495e;
+}    
+    
+</style>
+
+
+<br>
+<a href="{{ url_for('home') }}" class="back-button">{{ g.translations['Back_to_Home'] }}</a>
+<h1>{{ g.translations['Orders_History'] }}</h1>
+<table>
+<tr>
+<th>{{ g.translations['Order_ID'] }}</th>
+<th class="sortable" onclick="sortTableByColumn(0, 1)"> <!-- Date column -->
+    {{ g.translations['Date'] }}
+</th>
+
+<th class="sortable" onclick="sortTableByColumn(0, 2)"> <!-- Status column -->
+    {{ g.translations['Status'] }}
+</th>
+<th>{{ g.translations['Payment_Method'] }}</th>
+<th>{{ g.translations['Payment_Status'] }}</th>
+<th>{{ g.translations['Details'] }}</th>
+<th>{{ g.translations['Delivery_Fees'] }}</th>
+<th>{{ g.translations['Total'] }}</th>
+<th>{{ g.translations['Edit'] }}</th>
+<th>{{ g.translations['Cancel'] }}</th>
+</tr>
+{% for order in orders %}
+<tr data-status="{{ order.status }}">
+    <td>{{ order.id }}</td>
+    <td data-sort="{{ order.date.isoformat() }}">{{ order.date | to_cairo_time | datetimeformat }}</td>    
+    <td data-sort="{{ order.status }}">
+        <span class="status-badge status-{{ order.status.lower() }}">
+            {{ g.translations[order.status] }}
+        </span>
+    </td>    
+    <td>{{ g.translations[order.payment_method.replace(' ', '_')] }}</td>
+    <td>{{ g.translations[order.payment_status.replace(' ', '_')] }}</td>
+<td>
+<ul>{% set total_order = [] %}
+{% for item in order.items %}
+<li>
+    {{ item.product.name_ar if g.current_language == 'ar' else item.product.name_en }}
+    {% if item.product_size %}
+        ({{ item.product_size.size_ar if g.current_language == 'ar' else item.product_size.size_en }})
+    {% endif %}:
+    {{ item.quantity }} × {{ '%.2f' % item.price }}
+</li>
+{% if total_order.append(item.quantity * item.price) %}{% endif %}
+{% endfor %}
+</ul>
+</td>
+<td>{{ '%.2f' % order.delivery_fees }} {{ g.translations['EGP'] }}</td>
+<td>{{ '%.2f' % order.order_total_price }} {{ g.translations['EGP'] }}</td>
+<td>
+<input type="hidden" id="orderStatus_{{ order.id }}" value="{{ order.status }}">
+<input type="hidden" id="paymentMethod_{{ order.id }}" value="{{ order.payment_method }}">
+<span id="orderEditMessage_{{ order.id }}"></span>
+<a href="{{ url_for('client_edit_order', order_id=order.id) }}" onclick="return validateOrderEdit('{{ order.id }}');">
+<button>{{ g.translations['Edit'] }}</button></a>
+</td>
+<td>
+<input type="hidden" id="orderCancel_{{ order.id }}" value="{{ order.status }}">
+<input type="hidden" id="paymentMethod_{{ order.id }}" value="{{ order.payment_method }}">
+<span id="orderCancelMessage_{{ order.id }}"></span>
+<form action="{{ url_for('client_cancel_order', order_id=order.id) }}" method="post" onsubmit="return validateOrderCancel('{{ order.id }}');" style="display:inline;">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+
+
+<button 
+    type="button"
+    onclick="showConfirmAndSubmit('{{ g.translations['Are_you_sure_delete_order'] }}', this.form)"
+>{{ g.translations['Cancel'] }}</button>
+
+
+</form>
+</td>
+</tr>
+{% endfor %}
+</table>
+
+<script>
+function sortTableByColumn(tableIndex, columnIndex) {
+    const table = document.getElementsByTagName("table")[tableIndex];
+    let switching = true;
+    let dir = "asc";
+    let switchcount = 0;
+
+    const statusOrder = {
+        "Pending": 1,
+        "Preparing": 2,
+        "Delivering": 3,
+        "Delivered": 4,
+        "Cancelled": 5
+    };
+
+    while (switching) {
+        switching = false;
+        const rows = table.rows;
+        let shouldSwitch = false;
+        let switchIndex = -1;
+
+        for (let i = 1; i < (rows.length - 1); i++) {
+            let xCell = rows[i].getElementsByTagName("TD")[columnIndex];
+            let yCell = rows[i + 1].getElementsByTagName("TD")[columnIndex];
+
+            let xValue = xCell.getAttribute('data-sort') || xCell.innerText;
+            let yValue = yCell.getAttribute('data-sort') || yCell.innerText;
+
+            if (columnIndex === 1) {  // Date column
+                xValue = Date.parse(xValue) || 0;
+                yValue = Date.parse(yValue) || 0;
+            }
+
+            if (columnIndex === 2) {  // Status column
+                xValue = statusOrder[xValue] || 99;  // Unknown statuses sorted last
+                yValue = statusOrder[yValue] || 99;
+            }
+
+            if (dir === "asc") {
+                if (xValue > yValue) {
+                    shouldSwitch = true;
+                    switchIndex = i;
+                    break;
+                }
+            } else if (dir === "desc") {
+                if (xValue < yValue) {
+                    shouldSwitch = true;
+                    switchIndex = i;
+                    break;
+                }
+            }
+        }
+
+        if (shouldSwitch && switchIndex !== -1) {
+            rows[switchIndex].parentNode.insertBefore(
+                rows[switchIndex + 1],
+                rows[switchIndex]
+            );
+            switching = true;
+            switchcount++;
+        } else {
+            if (switchcount === 0 && dir === "asc") {
+                dir = "desc";
+                switching = true;
+            }
+        }
+    }
+}    
+</script>
+
+
+{% endblock %}

@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% block title %}{{ g.translations['Manage_Accounts'] }}{% endblock %}
+
+{% block content %}
+<style>
+    table thead th { background-color: #36454F; color: white; }
+    tbody tr:hover { background-color: lightblue; }
+    th a { color: white; text-decoration: none; display: block; width: 100%; }
+    th a:hover { text-decoration: underline; }
+    th .sort-icon {margin-left: 5px; font-size: 0.8em; }
+    .search-and-filter-bar { margin-bottom: 5px; display: flex; gap: 5px; align-items: center; }
+    .search-and-filter-bar input[type="text"], .search-and-filter-bar select { width: 250px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+    .search-and-filter-bar button { padding: 8px 12px; }
+    .pagination { margin-top: 20px; text-align: center; }
+    .pagination a, .pagination span { margin: 0 5px; padding: 8px 12px; text-decoration: none; border: 1px solid #ddd; color: #337ab7; border-radius: 4px; }
+    .pagination .disabled { color: #777; pointer-events: none; background-color: #f5f5f5; }
+    .pagination .active { font-weight: bold; color: white; background-color: #337ab7; border-color: #337ab7; }
+</style>
+
+<a href="{{ url_for('home') }}" class="back-button">{{ g.translations['Back_to_Home'] }}</a>
+<h1>{{ g.translations['Manage_Accounts'] }}</h1>
+
+{% if current_user.superadmin %}
+<a href="{{ url_for('superadmin_admin_signup') }}"><button>{{ g.translations['New_Admin'] }}</button></a>
+{% endif %}
+<a href="{{ url_for('download_accounts_data') }}"><button>{{ g.translations['Download'] }}</button></a>
+<br><br>
+<div class="search-and-filter-bar">
+    <form method="get" action="{{ url_for('admin_accounts_manager') }}">
+        <input type="text" name="q" placeholder="{{ g.translations['Search_by_username_name_mobile'] }}" value="{{ search_query or '' }}">
+        
+        <select name="area" onchange="this.form.submit()">
+            <option value="">{{ g.translations['All_Areas'] }}</option>
+            {% for gov in governorates %}
+                <option value="{{ gov }}" {% if gov == filter_area %}selected{% endif %}>
+                    {{ g.translations[gov] }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">{{ g.translations['Search'] }}</button>
+        <a href="{{ url_for('admin_accounts_manager') }}"><button type="button">{{ g.translations['reset'] }}</button></a>
+    </form>
+</div>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                {% macro sortable_th(column_key, display_text) %}
+                    {% set next_order = 'desc' if sort_by == column_key and sort_order == 'asc' else 'asc' %}
+                    <th>
+                        <a href="{{ url_for('admin_accounts_manager', sort_by=column_key, sort_order=next_order, q=search_query, area=filter_area, page=pagination.page) }}">
+                            {{ display_text }}
+                            {% if sort_by == column_key %}<span class="sort-icon">{{ '▲' if sort_order == 'asc' else '▼' }}</span>{% else %}<span class="sort-icon">▲▼</span>{% endif %}
+                        </a>
+                    </th>
+                {% endmacro %}
+
+                {{ sortable_th('id', g.translations['ID']) }}
+                <th>{{ g.translations['Username'] }}</th>
+                {{ sortable_th('activated', g.translations['activated']) }}
+                {{ sortable_th('full_name', g.translations['Full_Name']) }}
+                {{ sortable_th('role', g.translations['Role']) }}
+                <th>{{ g.translations['Mobile'] }}</th>
+                {{ sortable_th('area', g.translations['Delivering_Area']) }}
+                <th>{{ g.translations['Address'] }}</th>
+                <th>{{ g.translations['Payment_Methods'] }}</th>
+                <th>{{ g.translations['Current_Payment_Method'] }}</th>
+                {{ sortable_th('total_completed_orders', g.translations['total_completed_orders']) }}
+                {{ sortable_th('completed_orders_count', g.translations['completed_orders_count']) }}
+                {{ sortable_th('last_order_status', g.translations['last_order_status']) }}
+                {{ sortable_th('last_order_date', g.translations['last_order_date']) }}
+                
+                {% if current_user.superadmin %}
+                <th>{{ g.translations['Edit'] }}</th>
+                <th>{{ g.translations['Delete'] }}</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for client in clients %}
+            <tr>
+                <td>{{ client.id }}</td>
+                <td>{{ client.username }}</td>
+                <td>{{ g.translations['activated'] if client.confirmed else g.translations['not_activated']}}</td>
+                <td>{{ client.full_name }}</td>
+                <td>{% if client.superadmin %}{{ g.translations['super_admin'] }}{% else %}{{ g.translations[client.role] }}{% endif %}</td>
+                <td>{{ client.mobile }}</td>
+                <td>{{ g.translations[client.area] }}</td>
+                <td style="{% if client.address|contains_arabic %}direction: rtl{% else %}direction: ltr{% endif %}">{{ client.address }}</td>
+                <td>{% if client.payment_methods_used %}{% set pmds=[] %}{% for x in client.payment_methods_used.split(',') %}{% if pmds.append(g.translations[x.strip().replace(' ','_')]) %}{% endif %}{% endfor %}{{ pmds|join(' - ') }}{% else %}—{% endif %}</td>
+                <td>{% if not client.last_payment_method %}—{% else %}{{ g.translations[client.last_payment_method.replace(' ','_')] }}{% endif %}</td>
+                <td>
+                    {% set ns = namespace(total_price=0) %}
+                    {% for order in client.orders or [] %}{% if order.status == 'Delivered' %}{% set ns.total_price = ns.total_price + order.order_total_price %}{% endif %}{% endfor %}
+                    {{ '%.2f' % ns.total_price }}
+                </td>
+                <td>
+                    {% set delivered_orders = client.orders | selectattr('status', 'equalto', 'Delivered') | list %}
+                    {{ delivered_orders | length }}
+                </td>
+                <td>
+                    {% if client.orders %}{{ g.translations[(client.orders | sort(attribute="date"))[-1].status] }}{% else %}—{% endif %}
+                </td>
+                <td>
+                    {% set dates = namespace(all=[]) %}
+                    {% for order in client.orders or [] %}{% set _ = dates.all.append(order.date) %}{% endfor %}
+                    {% set last_order_date = dates.all | max if dates.all else None %}
+                    {{ last_order_date | to_cairo_time | datetimeformat if last_order_date else '—' }}
+                </td>
+                {% if current_user.superadmin %}
+                <td><a href="{{ url_for('superadmin_edit_account', account_id=client.id) }}"><button>{{ g.translations['Edit'] }}</button></a></td>
+                <td>
+                    {% if current_user.role == 'admin' and client.role == 'client' %}
+                        <div class="form-container">
+                            <form action="{{ url_for('superadmin_delete_account', account_id=client.id) }}" method="post">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <div class="form-group">
+                                    <input type="button" value="{{ g.translations['Delete'] }}" onclick="showConfirmAndSubmit('{{ g.translations['Are_you_sure_delete_client'] }}', this.form)">
+                                </div>
+                            </form>
+                        </div>
+                    {% endif %}
+                    {% if current_user.superadmin and client.role == 'admin' and not client.superadmin %}
+                        <div class="form-container">
+                            <form action="{{ url_for('superadmin_delete_admin', client_id=client.id) }}" method="post">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <div class="form-group">
+                                    <input type="button" value="{{ g.translations['Delete_Admin'] }}" onclick="showConfirmAndSubmit('{{ g.translations['Are_you_sure_delete_admin'] }}', this.form)">
+                                </div>
+                            </form>
+                        </div>
+                    {% endif %}
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="pagination">
+    <a href="{{ url_for('admin_accounts_manager', page=pagination.prev_num, sort_by=sort_by, sort_order=sort_order, q=search_query, area=filter_area) if pagination.has_prev else '#' }}"
+       class="{{ 'disabled' if not pagination.has_prev }}">&#8249; {{ g.translations['Previous'] }}</a>
+    {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=1) %}
+        {% if page_num %}
+            <a href="{{ url_for('admin_accounts_manager', page=page_num, sort_by=sort_by, sort_order=sort_order, q=search_query, area=filter_area) }}"
+               class="{{ 'active' if page_num == pagination.page else '' }}">{{ page_num }}</a>
+        {% else %}
+            <span class="disabled">...</span>
+        {% endif %}
+    {% endfor %}
+    <a href="{{ url_for('admin_accounts_manager', page=pagination.next_num, sort_by=sort_by, sort_order=sort_order, q=search_query, area=filter_area) if pagination.has_next else '#' }}"
+       class="{{ 'disabled' if not pagination.has_next }}">{{ g.translations['Next'] }} &#8250;</a>
+</div>
+{% endblock %}

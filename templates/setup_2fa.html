@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% block title %}{{ g.translations.get('setup_2fa_title', 'Setup Two-Factor Authentication') }}{% endblock %}
+
+{% block content %}
+<style>
+    /* Responsive styling for the 2FA form */
+    .tfa-container {
+        direction: ltr !important;
+        max-width: 500px;
+        margin: 5px auto;
+        padding: 20px;
+        text-align: center;
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .tfa-title {
+        margin-top: 0;
+        margin-bottom: 0;
+        font-size: 1.5rem;
+        color: #333;
+    }
+
+    .tfa-desc {
+        color: #555;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        margin-bottom: 0;
+    }
+
+    .qr-code-wrapper {
+        background-color: white;
+        padding: 5px;
+        border-radius: 12px;
+        display: inline-block;
+        border: 1px solid #eaeaea;
+        margin-bottom: 0;
+    }
+
+    .qr-code-img {
+        max-width: 100%;
+        height: auto;
+        width: 200px; /* Slightly smaller base size for mobile */
+    }
+
+    .manual-code {
+        background-color: #f4f4f4;
+        padding: 10px;
+        border-radius: 6px;
+        letter-spacing: 2px;
+        font-size: 0.8rem;
+        color: #333;
+        display: inline-block;
+        margin-top: 0;
+        margin-bottom: 0;
+        word-break: break-all; /* Ensures long strings don't break mobile layout */
+    }
+
+    .tfa-form-group {
+        margin-top: 0;
+        margin-bottom: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .tfa-input {
+        width: 100%;
+        max-width: 300px;
+        padding: 15px;
+        font-size: 1.2rem;
+        letter-spacing: 5px;
+        text-align: center;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        transition: border-color 0.2s ease;
+        box-sizing: border-box;
+    }
+
+    .tfa-input:focus {
+        outline: none;
+        border-color: #007bff;
+    }
+
+    .tfa-submit {
+        width: 100%;
+        max-width: 300px;
+        padding: 5px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        box-sizing: border-box;
+    }
+
+    .tfa-submit:hover {
+        background-color: #0056b3;
+    }
+
+    /* Desktop Adjustments */
+    @media (min-width: 768px) {
+        .tfa-container {
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        .tfa-title {
+            font-size: 1.8rem;
+        }
+
+        .qr-code-img {
+            width: 250px; /* Restores the original 250px size on larger screens */
+        }
+
+        .tfa-input {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+<div class="form-container tfa-container">
+    <h2 class="tfa-title">{{ g.translations.get('setup_2fa_title', 'Setup Two-Factor Authentication') }}</h2>
+    <p class="tfa-desc">{{ g.translations.get('scan_qr_desc', 'Please scan the QR code below using your authenticator app (like Google Authenticator or Authy).') }}</p>
+
+    <div class="qr-code-wrapper">
+        <img src="data:image/png;base64,{{ qr_code_b64 }}" alt="QR Code" class="qr-code-img">
+    </div>
+    
+    <p class="tfa-desc">
+        {{ g.translations.get('manual_entry_desc', 'Or enter this code manually:') }}<br>
+        <strong class="manual-code">{{ secret }}</strong>
+    </p>
+
+    <p class="tfa-desc">
+        {{ g.translations.get('enter_code_to_verify', 'Once scanned, enter the 6-digit code below to verify.') }}
+    </p>
+
+    <form method="post" action="{{ url_for('setup_2fa') }}" class="form-group-login-signup tfa-form-group">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="text" name="code" class="tfa-input" placeholder="{{ g.translations.get('enter_code', '6-digit Code') }}" required autocomplete="off" autofocus pattern="[0-9]*" inputmode="numeric">
+        <button type="submit" class="tfa-submit">{{ g.translations.get('verify_and_enable', 'Verify and Enable 2FA') }}</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block title %}{{ seo.title }}{% endblock %}
+{% block meta_description %}{{ seo.description }}{% endblock %}
+{% block og_title %}{{ seo.og_title }}{% endblock %}
+{% block og_description %}{{ seo.og_description }}{% endblock %}
+{% block og_image %}{{ seo.og_image }}{% endblock %}
+{% block twitter_title %}{{ seo.og_title }}{% endblock %}
+{% block twitter_description %}{{ seo.og_description }}{% endblock %}
+{% block twitter_image %}{{ seo.og_image }}{% endblock %}
+
+{% block content %}
+<style>
+    /* This style block is copied from your privacy_policy.html for consistency */
+    .policy-container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px 40px;
+        background-color: #fff;
+        border: 1px solid #e9e9e9;
+        border-radius: 8px;
+        line-height: 1.6;
+        color: #333;
+    }
+    .policy-container h1 {
+        font-size: 2.5em;
+        color: #000;
+        border-bottom: 2px solid #f0f0f0;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+    .policy-container h2 {
+        font-size: 1.8em;
+        color: #36454F;
+        margin-top: 40px;
+        margin-bottom: 15px;
+    }
+    .policy-container p, .policy-container li {
+        font-size: 1em;
+        margin-bottom: 15px;
+    }
+    .policy-container ul {
+        list-style-type: disc;
+        padding-left: 20px;
+    }
+    .policy-container a {
+        color: #007bff;
+        text-decoration: none;
+    }
+    .policy-container a:hover {
+        text-decoration: underline;
+    }
+    .policy-container .last-updated {
+        font-style: italic;
+        color: #777;
+        font-size: 0.9em;
+    }
+</style>
+
+<div class="policy-container">
+    <h1>{{ g.translations['Shipping_Policy'] }}</h1>
+    <p class="last-updated">{{ g.translations['Last_updated'] }}: August 20, 2025</p>
+
+    <h2>{{ g.translations['sp_h_processing'] }}</h2>
+    <p>{{ g.translations['sp_processing_p1'] }}</p>
+
+    <h2>{{ g.translations['sp_h_duration'] }}</h2>
+    <p>{{ g.translations['sp_duration_p1'] }}</p>
+    <ul>
+        <li><strong>{{ g.translations['sp_duration_cairo'] }}:</strong> {{ g.translations['sp_duration_cairo_desc'] }}</li>
+        <li><strong>{{ g.translations['sp_duration_other'] }}:</strong> {{ g.translations['sp_duration_other_desc'] }}</li>
+    </ul>
+    <p>{{ g.translations['sp_duration_p2'] }}</p>
+
+    <h2>{{ g.translations['sp_h_costs'] }}</h2>
+    <p>{{ g.translations['sp_costs_p1'] }}</p>
+
+    <h2>{{ g.translations['sp_h_tracking'] }}</h2>
+    <p>{{ g.translations['sp_tracking_p1'] }}</p>
+
+    <h2>{{ g.translations['sp_h_issues'] }}</h2>
+    <p>{{ g.translations['sp_issues_p1']|safe }}</p>
+</div>
+{% endblock %}

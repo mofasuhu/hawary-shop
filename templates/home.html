@@ -1,0 +1,838 @@
+{% extends 'base.html' %}
+{% block title %}{{ seo.title }}{% endblock %}
+{% block meta_description %}{{ seo.description }}{% endblock %}
+{% block og_title %}{{ seo.og_title }}{% endblock %}
+{% block og_description %}{{ seo.og_description }}{% endblock %}
+{% block og_image %}{{ seo.og_image }}{% endblock %}
+{% block twitter_title %}{{ seo.og_title }}{% endblock %}
+{% block twitter_description %}{{ seo.og_description }}{% endblock %}
+{% block twitter_image %}{{ seo.og_image }}{% endblock %}
+
+{% block content %}
+<style>
+    /*
+    ==========================================================================
+    -- DETAILED & HIGH-SPECIFICITY STYLES FOR HOME PAGE FILTER & SEARCH --
+    -- Designed to override external stylesheets.
+    ==========================================================================
+    */
+
+    /* --- Main Filter Container --- */
+    #home-filter-container {
+        max-width: 800px;
+        margin: 10px auto 10px auto;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border: 1px solid #e9e9e9;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        box-sizing: border-box;
+    }
+
+    /* --- Search Bar Section --- */
+    #home-filter-container .search-bar-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-bottom: 20px;
+    }
+
+    #home-filter-container .search-bar-wrapper input[type="search"] {
+        width: 170px;
+        flex-grow: 1;
+        padding: 12px 15px;
+        font-size: 18px;
+        color: #333;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        transition: border-color 0.3s, box-shadow 0.3s;
+        appearance: none;
+        -webkit-appearance: none;
+    }
+
+    #home-filter-container .search-bar-wrapper input[type="search"]:focus {
+        outline: none;
+        border-color: #36454F;
+        box-shadow: 0 0 0 3px rgba(54, 69, 79, 0.1);
+    }
+
+    /* --- SVG Icon Buttons --- */
+    #home-filter-container .search-bar-wrapper .icon-button {
+
+        /* Reset properties from your global style */
+        width: auto;
+        /* Let the button size itself based on content */
+        margin: 0;
+        /* Reset margin */
+
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px;
+        border: none;
+        background-color: transparent;
+        cursor: pointer;
+        text-decoration: none;
+        transition: transform 0.2s ease;
+    }
+
+    #home-filter-container .search-bar-wrapper .icon-button:hover {
+        transform: scale(1.1);
+    }
+
+    #home-filter-container .search-bar-wrapper .icon-button svg {
+        width: 24px;
+        height: 24px;
+        stroke: #555;
+        stroke-width: 2;
+        fill: none;
+        transition: stroke 0.3s;
+    }
+
+    #home-filter-container .search-bar-wrapper .icon-button:hover svg {
+        stroke: #000;
+    }
+
+    /* --- Category Buttons Section --- */
+    #home-filter-container .category-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    #home-filter-container .category-buttons .category-btn {
+        width: auto;
+        margin: 0;
+        padding: 10px 20px;
+        font-size: 20px;
+        font-weight: bold;
+        color: #333;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+    }
+
+    #home-filter-container .category-buttons .category-btn:hover {
+        background-color: #f0f0f0;
+        border-color: #ccc;
+        color: #000;
+        transform: translateY(-2px);
+    }
+
+    #home-filter-container .category-buttons .category-btn.active {
+        background-color: var(--brand-accent);
+        color: white;
+        border-color: var(--brand-accent);
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(232, 130, 26, 0.3);
+        transform: translateY(-2px);
+    }
+
+    /* Offers filter — always visually distinct (sale / discount) */
+    #home-filter-container .category-buttons .category-btn--offers {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #fff;
+        background: linear-gradient(135deg, #d32f2f 0%, var(--brand-accent) 55%, #f57c00 100%);
+        border: 2px solid #b71c1c;
+        box-shadow: 0 4px 14px rgba(211, 47, 47, 0.4);
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        animation: offers-btn-glow 2.5s ease-in-out infinite;
+    }
+
+    #home-filter-container .category-buttons .category-btn--offers .offers-btn-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.35em;
+        height: 1.35em;
+        font-size: 0.85em;
+        font-weight: 800;
+        background: rgba(255, 255, 255, 0.25);
+        border-radius: 50%;
+        line-height: 1;
+    }
+
+    #home-filter-container .category-buttons .category-btn--offers:hover {
+        color: #fff;
+        background: linear-gradient(135deg, #c62828 0%, #e65100 100%);
+        border-color: #8b0000;
+        box-shadow: 0 6px 18px rgba(211, 47, 47, 0.5);
+        transform: translateY(-3px) scale(1.02);
+    }
+
+    #home-filter-container .category-buttons .category-btn--offers.active {
+        color: #fff;
+        background: linear-gradient(135deg, #b71c1c 0%, #e65100 45%, #ff8f00 100%);
+        border-color: #fff;
+        outline: 3px solid rgba(255, 255, 255, 0.85);
+        outline-offset: 2px;
+        box-shadow: 0 6px 20px rgba(183, 28, 28, 0.55), 0 0 0 4px rgba(232, 130, 26, 0.35);
+        transform: translateY(-3px) scale(1.04);
+        animation: none;
+    }
+
+    @keyframes offers-btn-glow {
+        0%, 100% {
+            box-shadow: 0 4px 14px rgba(211, 47, 47, 0.4);
+        }
+        50% {
+            box-shadow: 0 4px 18px rgba(245, 124, 0, 0.55), 0 0 12px rgba(232, 130, 26, 0.35);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        #home-filter-container .category-buttons .category-btn--offers {
+            animation: none;
+        }
+    }
+
+    #home-filter-container .search-bar-wrapper input[type="search"]:focus {
+        outline: none;
+        border-color: var(--brand-accent);
+        box-shadow: 0 0 0 3px rgba(232, 130, 26, 0.15);
+    }
+
+
+    /*
+    ==========================================================================
+    -- RESPONSIVE STYLES for Mobile and Tablet --
+    ==========================================================================
+    */
+    @media (max-width: 768px) {
+        #home-filter-container {
+            padding: 15px;
+        }
+
+        #home-filter-container .search-bar-wrapper input[type="search"] {
+            padding: 10px 12px;
+        }
+
+        #home-filter-container .search-bar-wrapper .icon-button svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        #home-filter-container .category-buttons {
+            gap: 8px;
+        }
+
+        #home-filter-container .category-buttons .category-btn {
+            font-size: 15px;
+            padding: 8px 15px;
+        }
+    }
+
+
+
+    .admin-stats-bar {
+        background-color: var(--brand-mid);
+        color: white;
+        padding: 10px 20px;
+        margin: 10px;
+        border-radius: 10px;
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .admin-stats-bar .stat {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .admin-stats-bar .stat-value {
+        font-size: 20px;
+        font-weight: bold;
+        color: var(--brand-accent);
+    }
+
+    .admin-stats-bar .stat-label {
+        color: #ccc;
+    }
+
+    /* ─── Hero Section — Product Image Marquee ─────────────────────────── */
+    .hero-section {
+        position: relative;
+        min-height: 400px;
+        background: var(--brand-dark);
+        color: white;
+        text-align: center;
+        margin: 10px 0 20px 0;
+        border-radius: 16px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Stage holds the two scrolling rows */
+    .hero-img-stage {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding: 6px 0;
+        overflow: hidden;
+    }
+
+    /* Each track is a flex row of images */
+    .hero-img-track {
+        display: flex;
+        gap: 8px;
+        flex: 1;
+        align-items: stretch;
+        /* Width = 2× content so the -50% trick loops perfectly */
+        width: max-content;
+    }
+
+    .hero-img-track.track-ltr {
+        animation: heroScrollLTR 35s linear infinite;
+    }
+
+    .hero-img-track.track-rtl {
+        animation: heroScrollRTL 25s linear infinite;
+    }
+
+    .rtl .hero-img-track.track-ltr {
+        animation-name: heroScrollLTR_RTL;
+    }
+
+    .rtl .hero-img-track.track-rtl {
+        animation-name: heroScrollRTL_RTL;
+    }
+
+    @keyframes heroScrollLTR {
+        from {
+            transform: translateX(0);
+        }
+
+        to {
+            transform: translateX(-50%);
+        }
+    }
+
+    @keyframes heroScrollRTL {
+        from {
+            transform: translateX(-50%);
+        }
+
+        to {
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes heroScrollLTR_RTL {
+        from {
+            transform: translateX(0);
+        }
+
+        to {
+            transform: translateX(50%);
+        }
+    }
+
+    @keyframes heroScrollRTL_RTL {
+        from {
+            transform: translateX(50%);
+        }
+
+        to {
+            transform: translateX(0);
+        }
+    }
+
+    .hero-img-track img {
+        height: 175px;
+        width: 175px;
+        object-fit: cover;
+        border-radius: 10px;
+        flex-shrink: 0;
+        filter: brightness(0.65) saturate(0.85);
+        transition: filter 0.3s;
+        pointer-events: none;
+        user-select: none;
+    }
+
+    /* Dark + amber gradient overlay over images */
+    .hero-overlay {
+        position: absolute;
+        inset: 0;
+        background:
+            linear-gradient(to right,
+                rgba(26, 35, 50, 0.88) 0%,
+                rgba(26, 35, 50, 0.30) 15%,
+                rgba(26, 35, 50, 0.30) 85%,
+                rgba(26, 35, 50, 0.88) 100%),
+            linear-gradient(to bottom,
+                rgba(26, 35, 50, 0.60) 0%,
+                rgba(26, 35, 50, 0.10) 50%,
+                rgba(26, 35, 50, 0.60) 100%);
+        pointer-events: none;
+    }
+
+    /* Amber radial glow in center */
+    .hero-overlay::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse at center,
+                rgba(232, 130, 26, 0.18) 0%,
+                transparent 68%);
+        animation: heroPulse 5s ease-in-out infinite;
+    }
+
+    /* Text sits above everything */
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        padding: 50px 20px 45px;
+        width: 100%;
+    }
+
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(232, 130, 26, 0.18);
+        border: 1px solid rgba(232, 130, 26, 0.45);
+        color: var(--brand-accent);
+        font-size: 1.2rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 5px 18px;
+        border-radius: 50px;
+        margin-bottom: 18px;
+    }
+
+    .hero-badge .badge-icon {
+        height: 20px;
+        width: auto;
+        display: block;
+        color: var(--brand-accent);
+    }
+
+    .hero-title {
+        font-size: clamp(2rem, 6vw, 3.5rem);
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        margin: 0 0 14px 0;
+        color: white;
+        text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
+    }
+
+    .hero-subtitle {
+        font-size: clamp(1.05rem, 2.5vw, 1.2rem);
+        color: rgba(255, 255, 255, 0.78);
+        margin: 0 0 30px 0;
+        font-weight: 400;
+        text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .hero-cta {
+        display: inline-block;
+        padding: 14px 40px;
+        background: var(--brand-accent);
+        color: white;
+        border-radius: 50px;
+        font-size: 1.2rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+        box-shadow: 0 4px 20px rgba(232, 130, 26, 0.7);
+    }
+
+    .hero-cta:hover {
+        transform: translateY(-3px) scale(1.05);
+        background: #d4731a;
+        box-shadow: 0 8px 28px rgba(232, 130, 26, 0.6);
+        color: white;
+    }
+
+    /* Pause animation on hover for accessibility */
+    /* .hero-section:hover .hero-img-track {
+        animation-play-state: paused;
+    } */
+
+    @media (max-width: 768px) {
+        .hero-section {
+            min-height: 300px;
+            margin: 5px 0 15px 0;
+            border-radius: 10px;
+        }
+
+        .hero-img-track img {
+            height: 130px;
+            width: 130px;
+        }
+
+        .hero-content {
+            padding: 35px 15px 30px;
+        }
+
+    .hero-subtitle {
+        font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+    }        
+
+    }
+</style>
+
+
+
+{% if current_user.role != 'admin' %}
+<section class="hero-section">
+
+    <!-- ── Scrolling product image background ── -->
+    <div class="hero-img-stage">
+
+        <!-- Row 1: scrolls left → right (LTR) -->
+        <div class="hero-img-track track-ltr">
+            {% for product in g.hero_products %}
+            <img src="{{ product.image_url if product.image_url.startswith('http') else url_for('static', filename=product.image_url) }}"
+                alt="" aria-hidden="true" loading="eager">
+            {% endfor %}
+            {# Duplicate for seamless infinite loop #}
+            {% for product in g.hero_products %}
+            <img src="{{ product.image_url if product.image_url.startswith('http') else url_for('static', filename=product.image_url) }}"
+                alt="" aria-hidden="true" loading="eager">
+            {% endfor %}
+        </div>
+
+        <!-- Row 2: scrolls right → left (RTL), reversed order for variety -->
+        <div class="hero-img-track track-rtl">
+            {% for product in g.hero_products %}
+            <img src="{{ product.image_url if product.image_url.startswith('http') else url_for('static', filename=product.image_url) }}"
+                alt="" aria-hidden="true" loading="eager">
+            {% endfor %}
+            {# Duplicate for seamless infinite loop #}
+            {% for product in g.hero_products %}
+            <img src="{{ product.image_url if product.image_url.startswith('http') else url_for('static', filename=product.image_url) }}"
+                alt="" aria-hidden="true" loading="eager">
+            {% endfor %}
+        </div>
+
+    </div>
+
+    <!-- ── Dark + amber overlay ── -->
+    <div class="hero-overlay"></div>
+
+    <!-- ── Centred text + CTA ── -->
+    <div class="hero-content">
+        <div class="hero-badge">
+            {% if g.current_language == 'ar' %}
+            <img src="{{ url_for('static', filename='default_v3_orange.svg') }}" class="badge-icon">
+            متجر هواري
+            الرسمي
+            {% else %}
+            <img src="{{ url_for('static', filename='default_v3_orange.svg') }}" class="badge-icon">
+            OFFICIAL
+            HAWARY
+            SHOP
+            {% endif %}
+        </div>
+        {% if g.current_language == 'ar' %}
+        <h1 class="hero-title">&#x1F6CD;&#x2009;اكتشف منتجاتنا المميزة</h1>
+        <p class="hero-subtitle">جودة عالية &nbsp;•&nbsp; أسعار تنافسية &nbsp;•&nbsp; توصيل سريع</p>
+        {% else %}
+        <h1 class="hero-title">&#x1F6CD;&#x2009;Discover Picks</h1>
+        <p class="hero-subtitle">Premium quality &nbsp;•&nbsp; Competitive prices &nbsp;•&nbsp; Fast delivery</p>
+        {% endif %}
+        <a href="#home-filter-container" class="hero-cta">
+            {% if g.current_language == 'ar' %}تسوق الآن{% else %}Shop Now{% endif %} &nbsp;&nbsp;<svg
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" width="24" height="24" style="vertical-align: middle;">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 8v8m-4-4l4 4 4-4" />
+            </svg>
+        </a>
+    </div>
+
+</section>
+{% endif %}
+
+<div class="form-container">
+
+    {% if current_user.role == "admin" %}
+    <form action="{{ url_for('generate_promocodes') }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group">
+            <input type="text" inputmode="decimal" pattern="^\d*\.?\d*$" class="custom-number-input"
+                oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" id="num_codes"
+                name="num_codes" min="1" placeholder="{{ g.translations['Number_of_Promocodes'] }}" required>
+        </div>
+        <div class="form-group">
+            <input type="text" inputmode="decimal" pattern="^\d*\.?\d*$" class="custom-number-input"
+                oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');"
+                id="discount_percent" name="discount_percent" min="1" max="100"
+                placeholder="{{ g.translations['Discount_Percent'] }}" required>
+        </div>
+        <div class="form-group">
+            <input type="submit" value="{{ g.translations['Generate'] }}">
+        </div>
+
+    </form>
+
+    <form action="{{ url_for('download_promocodes') }}" method="GET">
+
+        <div class="form-group">
+            <input type="submit" value="{{ g.translations['Download_PCs'] | safe }}">
+        </div>
+
+    </form>
+    {% endif %}
+
+</div>
+
+
+{% if visitor_stats %}
+<div class="admin-stats-bar">
+    <div class="stat">
+        <span class="stat-value">{{ visitor_stats.current }}</span>
+        <span class="stat-label">{{ g.translations['Current_Visitors'] }}</span>
+    </div>
+    <div class="stat">
+        <span class="stat-value">{{ visitor_stats.daily }}</span>
+        <span class="stat-label">{{ g.translations['Daily_Visitors'] }}</span>
+    </div>
+</div>
+{% endif %}
+
+
+
+<!-- ======================= NEW FILTER AND SEARCH FORM ======================= -->
+<div id="home-filter-container">
+    <form id="filter-form" action="{{ url_for('home') }}#home-filter-container" method="get">
+        <!-- Search Bar -->
+        <div class="search-bar-wrapper">
+            <input type="search" name="search" placeholder="{{ g.translations['Search_for_products'] }}"
+                value="{{ current_keyword or '' }}" aria-label="{{ g.translations['Search_for_products'] }}">
+
+            <!-- Search Icon Button -->
+            <button type="submit" class="icon-button" title="{{ g.translations['Search'] }}"
+                aria-label="{{ g.translations['Search'] }}">
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+            </button>
+
+            <!-- Reset Icon Button -->
+            <a href="{{ url_for('home') }}#home-filter-container" class="icon-button"
+                title="{{ g.translations['Reset'] }}" aria-label="{{ g.translations['Reset'] }}">
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="23 4 23 10 17 10"></polyline>
+                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                </svg>
+            </a>
+        </div>
+
+        <!-- Hidden input to store the selected category's English name -->
+        <input type="hidden" id="category-input" name="category" value="{{ current_category or '' }}">
+
+        <!-- Category Buttons -->
+        <div class="category-buttons">
+            <button type="button" class="category-btn {% if not current_category %}active{% endif %}" data-category="">
+                {{ g.translations['all_categories'] }}
+            </button>
+            <button type="button"
+                class="category-btn category-btn--offers {% if current_category == offers_filter %}active{% endif %}"
+                data-category="{{ offers_filter }}">
+                <span class="offers-btn-icon" aria-hidden="true">%</span>
+                <span>{% if g.current_language == 'ar' %}العروض{% else %}Offers{% endif %}</span>
+            </button>
+            {% for category_en_name in categories %}
+            <button type="button" class="category-btn {% if current_category == category_en_name %}active{% endif %}"
+                data-category="{{ category_en_name }}">
+                {{ g.translations[category_en_name|product_translate_process] or category_en_name }}
+            </button>
+            {% endfor %}
+        </div>
+    </form>
+</div>
+
+
+<!-- ======================= RESULTS COUNT ======================= -->
+{% if request.args.get('search') or request.args.get('category') %}
+<div class="products-count" style="text-align: center; margin-bottom: 20px;">
+    <p>{{ g.translations['Results_Found'] }}: {{ total_products }}</p>
+</div>
+{% endif %}
+
+
+<!-- ======================= PAGINATION ======================= -->
+{% if total_pages > 1 %}
+<div class="pagination">
+    {% if current_page > 1 %}
+    <a href="{{ url_for('home', page=1, search=current_keyword, category=current_category) }}#home-filter-container"
+        class="pagination-button">&#8249;&#8249; {{ g.translations['First'] }}</a>
+    <a href="{{ url_for('home', page=current_page - 1, search=current_keyword, category=current_category) }}#home-filter-container"
+        class="pagination-button">&#8249; {{ g.translations['Previous'] }}</a>
+    {% endif %}
+    <span class="pagination-info">{{ g.translations['Page'] }} {{ current_page }} {{ g.translations['of'] }} {{
+        total_pages }}</span>
+    {% if current_page < total_pages %} <a
+        href="{{ url_for('home', page=current_page + 1, search=current_keyword, category=current_category) }}#home-filter-container"
+        class="pagination-button">{{ g.translations['Next'] }} &#8250;</a>
+        <a href="{{ url_for('home', page=total_pages, search=current_keyword, category=current_category) }}#home-filter-container"
+            class="pagination-button">{{ g.translations['Last'] }} &#8250;&#8250;</a>
+        {% endif %}
+</div>
+{% endif %}
+
+
+<!-- ======================= PRODUCT DISPLAY GRID ======================= -->
+<div class="products-grid" id="products-section">
+    {% for product in products %}
+    <div class="product-card" data-product="{{ product.name_en }}" style="position: relative;">
+        {% if current_user.role != 'admin' %}
+            {% set in_wishlist = current_user.is_authenticated and current_user.wishlist and product.id in current_user.wishlist.products %}
+            {% if in_wishlist %}
+                <button class="wishlist-toggle-btn" data-product-id="{{ product.id }}" data-action="remove" data-authenticated="{{ 'true' if current_user.is_authenticated else 'false' }}" style="position: absolute; top: 10px; left: 10px; z-index: 15; background: rgba(255,255,255,0.8); border: none; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; color: red; font-size: 20px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2);" title="{{ g.translations['Remove_from_Wishlist'] }}">
+                    <i class="fa-solid fa-heart"></i>
+                </button>
+            {% else %}
+                <button class="wishlist-toggle-btn" data-product-id="{{ product.id }}" data-action="add" data-authenticated="{{ 'true' if current_user.is_authenticated else 'false' }}" style="position: absolute; top: 10px; left: 10px; z-index: 15; background: rgba(255,255,255,0.8); border: none; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; color: gray; font-size: 20px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2);" title="{{ g.translations['Add_to_Wishlist'] }}">
+                    <i class="fa-regular fa-heart"></i>
+                </button>
+            {% endif %}
+
+            {% if product.reviews %}
+                {% set avg_rating = (product.reviews | map(attribute='rating') | sum / product.reviews | length) | round | int %}
+                <div class="product-avg-rating" style="position: absolute; top: 12px; left: 55px; z-index: 15; background: rgba(255,255,255,0.8); padding: 4px 10px; border-radius: 20px; display: flex; align-items: center; gap: 2px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); font-size: 13px; transition: transform 0.2s ease;">
+                    <span style="color: #ff9900; display: flex;">
+                        {% for i in range(avg_rating) %}★{% endfor %}
+                    </span>
+                    <span style="color: #e2e8f0; display: flex;">
+                        {% for i in range(5 - avg_rating) %}★{% endfor %}
+                    </span>
+                    <span style="margin-left: 5px; font-weight: 700; color: #4a5568; font-size: 11px;">({{ product.reviews | length }})</span>
+                </div>
+            {% endif %}
+        {% endif %}
+        <a href="{{ url_for('product_page', product_id=product.id) }}" class="product-card-link" style="position: relative; display: block;">
+            {% if product.discount_percent > 0 %}
+            <div class="discount-badge" style="position: absolute; top: 10px; right: 10px; background: rgba(255,0,0,0.8); color: white; padding: 5px 10px; border-radius: 5px; font-weight: bold; z-index: 10;">
+                {{ "%.0f"|format(product.discount_percent) }}% {% if g.current_language == 'ar' %}خصم{% else %}OFF{% endif %}
+            </div>
+            {% endif %}
+            <img src="{{ product.image_url if product.image_url.startswith('http' ) else url_for('static', filename=product.image_url) }}"
+                alt="{{ product.name_ar if g.current_language == 'ar' else product.name_en }} - Product Image">
+        </a>
+        <h2>{{ product.name_ar if g.current_language == 'ar' else product.name_en }}</h2>
+        <a href="{{ url_for('product_page', product_id=product.id) }}" class="product-card-link">&#x2000;{{
+            g.translations['Read_More'] }}&#x2000;</a>
+        {% set product_sizes = product.sizes | sort(attribute='price') %}
+        {% if product_sizes %}
+        <p style="font-size: 15px;">
+            {% if product.discount_percent > 0 %}
+                <span style="text-decoration: line-through; color: gray;">
+                    {{ '%.2f'|format(product_sizes[0].price) }}
+                </span>
+                <span style="color: red; font-weight: bold; margin-left: 5px;">
+                    {{ '%.2f'|format(product_sizes[0].price * (1 - product.discount_percent/100)) }}
+                </span>
+            {% else %}
+                {{ '%.2f'|format(product_sizes[0].price) }}
+            {% endif %}
+            
+            {% if product_sizes|length > 1 %} – 
+                {% if product.discount_percent > 0 %}
+                    <span style="text-decoration: line-through; color: gray;">
+                        {{ '%.2f'|format(product_sizes[-1].price) }}
+                    </span>
+                    <span style="color: red; font-weight: bold; margin-left: 5px;">
+                        {{ '%.2f'|format(product_sizes[-1].price * (1 - product.discount_percent/100)) }}
+                    </span>
+                {% else %}
+                    {{ '%.2f'|format(product_sizes[-1].price) }}
+                {% endif %}
+            {% endif %}
+            {{ g.translations['EGP'] }}
+            
+            {% set total_qty = product.sizes | map(attribute='available_quantity') | sum %}
+            {% if total_qty > 0 %}
+                <span style="color: #38a169; font-size: 13px; font-weight: 700; margin-left: 10px; background: #f0fff4; padding: 2px 8px; border-radius: 4px;">
+                    <i class="fas fa-check-circle"></i> {{ g.translations['Available'] }}
+                </span>
+            {% else %}
+                <span style="color: #e53e3e; font-size: 13px; font-weight: 700; margin-left: 10px; background: #fff5f5; padding: 2px 8px; border-radius: 4px;">
+                    <i class="fas fa-times-circle"></i> {{ g.translations['Sold'] }}
+                </span>
+            {% endif %}
+        </p>
+        {% else %}
+        <p style="font-size: 15px; color: gray;">{{ g.translations['Price_Not_Available'] }}</p>
+        {% endif %}
+    </div>
+    {% else %}
+    <p style="text-align: center;">{{ g.translations['No_products_found'] }}</p>
+    {% endfor %}
+</div>
+
+<!-- ======================= PAGINATION ======================= -->
+{% if total_pages > 1 %}
+<div class="pagination">
+    {% if current_page > 1 %}
+    <a href="{{ url_for('home', page=1, search=current_keyword, category=current_category) }}#home-filter-container"
+        class="pagination-button">&#8249;&#8249; {{ g.translations['First'] }}</a>
+    <a href="{{ url_for('home', page=current_page - 1, search=current_keyword, category=current_category) }}#home-filter-container"
+        class="pagination-button">&#8249; {{ g.translations['Previous'] }}</a>
+    {% endif %}
+    <span class="pagination-info">{{ g.translations['Page'] }} {{ current_page }} {{ g.translations['of'] }} {{
+        total_pages }}</span>
+    {% if current_page < total_pages %} <a
+        href="{{ url_for('home', page=current_page + 1, search=current_keyword, category=current_category) }}#home-filter-container"
+        class="pagination-button">{{ g.translations['Next'] }} &#8250;</a>
+        <a href="{{ url_for('home', page=total_pages, search=current_keyword, category=current_category) }}#home-filter-container"
+            class="pagination-button">{{ g.translations['Last'] }} &#8250;&#8250;</a>
+        {% endif %}
+</div>
+{% endif %}
+
+<!-- ======================= BACK TO TOP & SCRIPTS ======================= -->
+<a href="#" id="back-to-top" title="{{ g.translations['Back_to_Top'] }}" style="display: none;"><svg fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;" viewBox="0 0 24 24">
+            <path d="M12 19V5"></path>
+            <path d="M5 12l7-7 7 7"></path>
+</svg></a>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('filter-form');
+        const categoryInput = document.getElementById('category-input');
+        const categoryButtons = document.querySelectorAll('.category-btn');
+
+        categoryButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const selectedCategory = this.dataset.category;
+                categoryInput.value = selectedCategory;
+                form.submit();
+            });
+        });
+
+        const backToTopButton = document.getElementById('back-to-top');
+        window.addEventListener('scroll', function () {
+            if (window.scrollY > 200) {
+                backToTopButton.style.display = 'block';
+            } else {
+                backToTopButton.style.display = 'none';
+            }
+        });
+        backToTopButton.addEventListener('click', function (e) {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    });
+</script>
+{% endblock %}

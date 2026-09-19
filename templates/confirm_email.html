@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="{{ language }}">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ g.translations['Confirm_Your_Email'] }}</title>
+    <style>
+        body {
+            direction: {{ 'rtl' if language == 'ar' else 'ltr' }};
+            text-align: {{ 'right' if language == 'ar' else 'left' }};
+        }
+    </style>
+</head>
+<body>
+    <p>{{ g.translations['Hi'] }}{{ g.translations['comma'] }}</p>
+    <p>{{ g.translations['Please_confirm_your_email'] }}:</p>
+    <p><a href="{{ confirm_url }}">{{ confirm_url }}</a></p>
+    <p>{{ g.translations['Link_usage_info'] }}</p>
+    <p>{{ g.translations['Ignore_email_if_not_requested'] }}</p>
+    <p>{{ g.translations['Best_regards'] }}{{ g.translations['comma'] }}<br>{{ g.translations['Mist_Team'] }}</p>
+</body>
+</html>
+

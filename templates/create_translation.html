@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}{{ g.translations['Create_Translation_Item'] }}{% endblock %}
+{% block content %}
+<h1>{{ g.translations['Create_Translation_Item'] }}</h1>
+
+<div class="form-container">
+
+<form action="{{ url_for('create_a_translation_item') }}" method="post">
+
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+<div class="form-group-login-signup">
+
+<input type="text" name="key" placeholder="{{ g.translations['the_key'] }}" required>
+<textarea name="value_en" placeholder="{{ g.translations['English_translation'] }}" required></textarea>
+<textarea name="value_ar" placeholder="{{ g.translations['Arabic_translation'] }}" required></textarea>
+<input type="submit" value="{{ g.translations['Create_Translation'] }}">
+
+</div>   
+
+</form>
+
+</div>
+
+{% endblock %}
+

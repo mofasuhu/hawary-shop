@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block title %}{{ g.translations['Edit_Order'] }} - {{ order.id }}{% endblock %}
+{% block content %}
+<a href="{{ url_for('orders_admin_viewer') }}" class="back-button">{{ g.translations['Back_to_Orders'] }}</a>
+<h1>{{ g.translations['Edit_Order'] }} #{{ order.id }}</h1>
+
+    <h2>{{ g.translations['Order_Details'] }}</h2>
+    <p><strong>{{ g.translations['client_uppercased'] }}:</strong>  #{{ order.user.id }} - {{ order.recipient_name }} - {{ order.user.username }}</p>
+    <p><strong>{{ g.translations['Phone'] }}:</strong>  {{ order.recipient_phone }}</p>
+    <p><strong>{{ g.translations['Delivering_Area'] }}:</strong>  <span>{{ g.translations[order.area] }}</span></p>    
+    <p><strong>{{ g.translations['Delivering_Address'] }}:</strong>  <span style="{% if order.address|contains_arabic %}direction: rtl;{% else %}direction: ltr; unicode-bidi: isolate;{% endif %}">{{ order.address }}</span></p>
+    <p><strong>{{ g.translations['Date'] }}:</strong> {{ order.date | to_cairo_time | datetimeformat }}</p>
+    <p><strong>{{ g.translations['Payment_Method'] }}:</strong> {{ g.translations[order.payment_method.replace(' ','_')] }}</p>
+    <p><strong>{{ g.translations['Payment_Status'] }}:</strong> {{ g.translations[order.payment_status.replace(' ','_')] }}</p>
+    <p><strong>{{ g.translations['Order_Status'] }}:</strong> {{ g.translations[order.status] }}</p>
+    <p><strong>{{ g.translations['discount_applied'] }}:</strong> {{ order.order_discount_percent }}%</p>    
+    <p><strong>{{ g.translations['Total_Price'] }}:</strong> {{ '%.2f' % order.order_total_price }} {{ g.translations['EGP'] }}</p>
+    {% if order.transaction %}
+        <p><strong>{{ g.translations['Transaction_ID'] }}:</strong> {{ order.transaction.transaction_id }}</p>
+        <p><strong>{{ g.translations['Transaction_Amount'] }}:</strong> {{ '%.2f' % (order.transaction.amount_cents / 100) }} {{ g.translations['EGP'] }}</p>
+        <p><strong>{{ g.translations['Transaction_Net_Amount'] }}:</strong> {{ '%.2f' % (order.transaction.net_amount_cents / 100) }} {{ g.translations['EGP'] }}</p>
+        <p><strong>{{ g.translations['Refunded_Amount'] }}:</strong> {{ '%.2f' % (order.transaction.refunded_amount_cents / 100) }} {{ g.translations['EGP'] }}</p>
+    {% endif %}
+
+    <br>
+    <h2>{{ g.translations['Edit_Existing_Items'] }}</h2>
+<div class="form-container">
+    <form id="edit-order-items-form" action="{{ url_for('admin_edit_order', order_id=order.id) }}" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="included-table-form-group">
+        <table class="order-items-table">
+            <thead>
+                <tr>
+                    <th>{{ g.translations['Product'] }}</th>
+                    <th>{{ g.translations['Size'] }}</th> {# Added Size column #}
+                    <th>{{ g.translations['Price'] }}</th>
+                    <th>{{ g.translations['Quantity'] }}</th>
+                    <th>{{ g.translations['Subtotal'] }}</th>
+                    <th>{{ g.translations['Remove'] }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in order.items %}
+                <tr>
+                    <td>{{ item.product.name_en if g.current_language == 'en' else item.product.name_ar }}</td>
+                    <td>{{ item.product_size.size_en if g.current_language == 'en' else item.product_size.size_ar }}</td> {# Display product size #}
+                    <td>{{ item.price | round(2) }}</td>
+                    <td>
+                        <input type="text" inputmode="decimal" pattern="^\d*\.?\d*$" class="custom-number-input" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" name="quantity_{{ item.id }}" value="{{ item.quantity }}" min="1" required>
+                    </td>
+                    <td>{{ (item.quantity * item.price) | round(2) }}</td>
+                    <td>
+                        <input type="checkbox" name="remove_{{ item.id }}" value="remove" {% if order.items|length == 1 %}disabled{% endif %}>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <input type="submit" value="{{ g.translations['Update_Order_Items'] }}">
+        </div>
+    </form>
+</div>
+<br>
+
+
+{% if current_user.superadmin %}
+
+    <h2>{{ g.translations['Add_New_Products'] }}</h2>
+
+<div class="edit-order-container">
+    <div class="edit-order-group">
+        <button type="button" onclick="addProductRow()">+ {{ g.translations['Add_Product'] }}</button>
+        <button type="button" onclick="submitNewProducts({{ order.id }})">{{ g.translations['Submit_New_Products'] }}</button>
+    </div>
+</div>
+
+
+    <form id="new-products-form" onsubmit="return validateForm()">
+        <div id="new-products-container">
+            {# Product rows will be dynamically added here by JavaScript #}
+        </div>
+    </form>
+{% endif %}
+
+<br><br><br><br><br><br><br><br>
+{% endblock %}

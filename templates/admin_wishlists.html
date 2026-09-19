@@ -1,0 +1,355 @@
+{% extends 'base.html' %}
+{% block title %}{{ g.translations['Customer_Wishlists'] }}{% endblock %}
+
+{% block content %}
+<style>
+  .wl-page {
+    max-width: 1050px;
+    margin: 32px auto;
+    padding: 0 20px 40px;
+  }
+
+  .wl-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #f0f4f8;
+  }
+
+  .wl-header-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--brand-accent, #e8821a);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .wl-header-icon svg {
+    width: 20px;
+    height: 20px;
+    fill: #fff;
+  }
+
+  .wl-header h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1a202c;
+    letter-spacing: -0.02em;
+  }
+
+  /* Table wrapper */
+  .wl-table-wrap {
+    background: #fff;
+    border-radius: 14px;
+    border: 1px solid #e8edf3;
+    overflow: hidden;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .wl-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 420px;
+  }
+
+  .wl-table thead tr {
+    background: #f7f9fc;
+    border-bottom: 1.5px solid #e8edf3;
+  }
+
+  .wl-table thead th {
+    padding: 13px 16px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #718096;
+    white-space: nowrap;
+  }
+
+  .wl-table tbody tr {
+    border-bottom: 1px solid #f0f4f8;
+    transition: background 0.15s;
+  }
+
+  .wl-table tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  .wl-table tbody tr:hover {
+    background: #fffbf7;
+  }
+
+  .wl-table td {
+    padding: 14px 16px;
+    vertical-align: top;
+    color: #2d3748;
+    font-size: 14px;
+  }
+
+  /* Customer cell */
+  .wl-customer-name {
+    font-weight: 600;
+    color: #1a202c;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .wl-customer-handle {
+    color: #a0aec0;
+    font-size: 12px;
+    margin-top: 2px;
+  }
+
+  /* Mobile number */
+  .wl-mobile {
+    font-family: monospace;
+    font-size: 13px;
+    color: #4a5568;
+    white-space: nowrap;
+  }
+
+  /* Badge */
+  .wl-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--brand-accent, #e8821a);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    min-width: 28px;
+    height: 24px;
+    padding: 0 8px;
+    border-radius: 20px;
+  }
+
+  /* Product list */
+  .wl-product-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .wl-product-list li::before {
+    content: '›';
+    color: var(--brand-accent, #e8821a);
+    font-weight: 700;
+    margin-inline-end: 6px;
+  }
+
+  .wl-product-list a {
+    color: #36454f;
+    text-decoration: none;
+    font-size: 13.5px;
+    transition: color 0.15s;
+  }
+
+  .wl-product-list a:hover {
+    color: var(--brand-accent, #e8821a);
+    text-decoration: underline;
+  }
+
+  /* Empty state */
+  .wl-empty {
+    text-align: center;
+    padding: 48px 20px;
+    color: #a0aec0;
+    font-size: 15px;
+  }
+
+  .wl-empty svg {
+    width: 40px;
+    height: 40px;
+    fill: #e2e8f0;
+    display: block;
+    margin: 0 auto 12px;
+  }
+
+  /* Pagination */
+  .wl-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+
+  .wl-pagination a,
+  .wl-pagination-info {
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 18px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .wl-pagination a {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    color: #4a5568;
+  }
+
+  .wl-pagination a:hover {
+    background: var(--brand-accent, #e8821a);
+    border-color: var(--brand-accent, #e8821a);
+    color: #fff;
+  }
+
+  .wl-pagination-info {
+    background: #f7f9fc;
+    border: 1px solid #e8edf3;
+    color: #718096;
+    cursor: default;
+  }
+
+  /* Responsive: collapse to cards below 600px */
+    @media (max-width: 768px) {
+    .wl-page {
+      padding: 5px;
+      margin-top: 5px;
+    }
+
+    .wl-header h2 {
+      font-size: 18px;
+    }
+
+    .wl-table-wrap {
+      border-radius: 10px;
+    }
+
+    .wl-table thead {
+      display: none;
+    }
+
+    .wl-table,
+    .wl-table tbody,
+    .wl-table tr,
+    .wl-table td {
+      display: block;
+      width: 100%;
+    }
+
+    .wl-table tbody tr {
+      padding: 14px;
+      border-bottom: 1px solid #f0f4f8;
+      position: relative;
+    }
+
+    .wl-table td {
+      padding: 4px 0;
+      border: none;
+    }
+
+    .wl-table td[data-label]::before {
+      content: attr(data-label);
+      display: block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #a0aec0;
+      margin-bottom: 3px;
+      margin-top: 10px;
+    }
+
+    .wl-table td:first-child[data-label]::before {
+      margin-top: 0;
+    }
+  }
+</style>
+
+<div class="wl-page">
+
+  <div class="wl-header">
+    <div class="wl-header-icon">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+      </svg>
+    </div>
+    <h2>{{ g.translations['Customer_Wishlists'] }}</h2>
+  </div>
+
+  <div class="wl-table-wrap">
+    <table class="wl-table">
+      <thead>
+        <tr>
+          <th>{{ g.translations['Customer_Name'] }}</th>
+          <th>{{ g.translations['Mobile'] }}</th>
+          <th style="text-align:center;">{{ g.translations['Items_Count'] }}</th>
+          <th>{{ g.translations['Products_Favorited'] }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for wishlist in wishlists %}
+        {% if wishlist.products and wishlist.products | length > 0 %}
+        <tr>
+          <td data-label="{{ g.translations['Customer_Name'] }}">
+            <div class="wl-customer-name">{{ wishlist.user.full_name }}</div>
+            <div class="wl-customer-handle">{{ wishlist.user.username }}</div>
+          </td>
+          <td data-label="{{ g.translations['Mobile'] }}">
+            <span class="wl-mobile">{{ wishlist.user.mobile }}</span>
+          </td>
+          <td data-label="{{ g.translations['Items_Count'] }}" style="text-align:center;">
+            <span class="wl-badge">{{ wishlist.products | length }}</span>
+          </td>
+          <td data-label="{{ g.translations['Products_Favorited'] }}">
+            <ul class="wl-product-list">
+              {% for product_id in wishlist.products %}
+                {% set product = Product.query.get(product_id) %}
+                {% if product %}
+                  <li>
+                    <a href="{{ url_for('product_page', product_id=product.id) }}" target="_blank">
+                      {{ product.name_ar if g.current_language == 'ar' else product.name_en }}
+                    </a>
+                  </li>
+                {% endif %}
+              {% endfor %}
+            </ul>
+          </td>
+        </tr>
+        {% endif %}
+        {% else %}
+        <tr>
+          <td colspan="4">
+            <div class="wl-empty">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+              </svg>
+              {{ g.translations['no_wishlists_found'] }}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if pagination.pages > 1 %}
+  <div class="wl-pagination">
+    {% if pagination.has_prev %}
+    <a href="{{ url_for('admin_wishlists', page=pagination.prev_num) }}">&laquo; {{ g.translations['Previous'] }}</a>
+    {% endif %}
+    <span class="wl-pagination-info">{{ g.translations['Page'] }} {{ pagination.page }} {{ g.translations['of'] }} {{ pagination.pages }}</span>
+    {% if pagination.has_next %}
+    <a href="{{ url_for('admin_wishlists', page=pagination.next_num) }}">{{ g.translations['Next'] }} &raquo;</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

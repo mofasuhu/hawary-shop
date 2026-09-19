@@ -1,0 +1,6 @@
+key,value_en,value_ar
+Product_Updated_Successfully,Product Updated Successfully.,تم تحديث المنتج بنجاح.
+product_size_exceeds_available_at_order_time,{product_name} ({size_name}) exceeds available quantity at the moment of ordering. Only {available_quantity} available.,{product_name} ({size_name}) يتجاوز الكمية المتاحة في لحظة الطلب. المتاح فقط {available_quantity}.
+cannot_add_more_than_available_for_item,Cannot add more {product_name} ({size_name}). Only {available_quantity} available.,لا يمكن إضافة المزيد من {product_name} ({size_name}). المتاح فقط {available_quantity}.
+product_Good_product,Good,جيد
+refund_failed_on_status_change,Refund failed on status change: {message},فشل استرداد المبلغ عند تغيير الحالة: {message}

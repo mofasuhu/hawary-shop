@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% block title %}{{ g.translations['View_Order'] }}{% endblock %}
+{% block content %}
+<a href="{{ url_for('home') }}" class="back-button">{{ g.translations['Back_to_Home'] }}</a>
+
+
+
+
+<ul>
+
+<li style="display: flex; align-items: center; gap: 6px;"><span class="tooltip">
+<a href="{{ url_for('currentuser_profile_editing', referrer=request.path) }}">
+<button class="icon">
+<img src="{{ url_for('static', filename='location_edit.png') }}" alt="Edit Location" style="height: 20px;">
+</button>
+</a>
+<span class="tooltiptext">{{ g.translations['Edit'] }}</span>
+</span></li>
+
+<li>{{ g.translations['Full_Name'] }}: <span>{{ current_user.full_name }}</span></li>
+<li>{{ g.translations['Delivering_Area'] }}: <span>{{ g.translations[current_user.area] }}</span></li>
+<li>{{ g.translations['Delivering_Address'] }}: <span style="display: inline-block; {% if current_user.address|contains_arabic %} direction: rtl; text-align: right; {% else %} direction: ltr; text-align: left; {% endif %}">{{ current_user.address }}</span></li>
+<li>{{ g.translations['Mobile'] }}:  <span style="display: inline-block;">{{ current_user.mobile }}</span></li>
+
+</ul>
+
+<div class="order-summary-box">
+<div class="summary-box-card">
+<h2>{{ g.translations['Current_Order'] }}</h2><br>
+
+
+        {% for item in order_items %}
+        <div class="summary-card" style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+            
+            <!-- 1. Product Image -->
+            <a href="{{ url_for('product_page', product_id=item.product.id, product_size_id=item.product_size.id) }}" class="product-link">
+            
+            <img src="{{ item.product.image_url if item.product.image_url.startswith('http' ) else url_for('static', filename=item.product.image_url) }}" alt="{{ item.product.name_ar if g.current_language == 'ar' else item.product.name_en }} - Product Thumbnail" style="border: 1px solid lightgray; height: 75px; width: auto; border-radius: 5px; object-fit: cover;">
+            
+            </a>
+            
+            <div style="flex-grow: 1;">
+                <!-- 2. Hyperlinked Product Name -->
+                <a href="{{ url_for('product_page', product_id=item.product.id, product_size_id=item.product_size.id) }}" class="product-link">
+                    {{ item.product.name_ar if g.current_language == 'ar' else item.product.name_en }}
+                </a>
+                <p>{{ item.product_size.size_ar if g.current_language == 'ar' else item.product_size.size_en }}</p>
+                
+                <p style="margin: 5px 0 0 0;">
+                    <!-- 3. Quantity controls and Remove button -->
+                    <button class="ordercard-plus-button" data-cart-key="{{ item.cart_key }}" data-available-quantity="{{ item.product_size.available_quantity }}">+</button>
+                    <span style="padding: 0 5px; font-weight: bold;">{{ item.quantity }}</span>
+                    <button class="ordercard-minus-button" data-cart-key="{{ item.cart_key }}">−</button>
+                    
+                    <span style="color:gray;"> × {{ '%.2f' % item.discounted_price }} {{ g.translations['EGP'] }}</span>
+                </p>
+            </div>
+
+            <!-- 4. The new "Remove Item" (x) button -->
+            <button class="remove-item-button" data-cart-key="{{ item.cart_key }}" style="background: none; border: none; font-size: 25px !important; font-weight: bold !important; color: red; cursor: pointer;" onmouseover="this.style.color='black';" onmouseout="this.style.color='red';">&times;</button>
+
+        </div>
+        {% else %}
+        <p>{{ g.translations['No_order'] }}</p>
+        {% endfor %}
+
+
+<h2><b>{{ g.translations['Total_Price'] }}: {{ "%.2f"|format(total_price) }} {{ g.translations['EGP'] }}</b></h2>
+
+{% if delivery_fees is defined and delivery_fees > 0 and total_price > 0 %}
+<p><b>{{ g.translations['Delivery_Fees'] }}: {{ "%.2f"|format(delivery_fees) }} {{ g.translations['EGP'] }}</b></p>
+<h2><b>{{ g.translations['Grand_Total'] }}: {{ "%.2f"|format(grand_total) }} {{ g.translations['EGP'] }}</b></h2>
+{% endif %}
+
+<input type="hidden" id="orderData" value="{{ 'true' if session.get('order') else 'false' }}">
+<h2><b><span id="orderDataMessage"></span></b></h2>
+
+<div class="order-container">
+
+<form id="applyPromoCodeForm" onsubmit="event.preventDefault(); applyPromoCode();">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<div class="form-group" style="min-width: 190px !important; max-width: 190px !important; font-size: 20px !important;">
+<input type="text" name="promocode" id="promocode" placeholder="{{ g.translations['Promo_Code'] }}" required>
+<input type="submit" value="{{ g.translations['Apply_PromoCode'] }}" style="font-size: 15px !important;">
+</div>
+</form>
+
+<br>
+<form action="{{ url_for('send_order') }}" method="post" onsubmit="return validateOrder();">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<div class="form-group" style="min-width: 190px !important; max-width: 190px !important; font-size: 20px !important;">
+{{ g.translations['Payment_Method'] }}:
+<select id="payment-method" name="payment_method" style="font-size: 20px !important;" required>
+<option value="" disabled selected></option>
+<option value="Bank Card" {% if current_user.last_payment_method == 'Bank Card' %}selected{% endif %}>{{ g.translations['Bank_Card'] }}</option>
+<option value="Cash on Delivery" {% if current_user.last_payment_method == 'Cash on Delivery' %}selected{% endif %}>{{ g.translations['Cash_on_Delivery'] }}</option>
+</select>
+ <input type="text" name="promocode" id="promocode-hidden" placeholder="{{ g.translations['Promo_Code'] }}">
+
+{% if not is_serviceable %}
+<div class="alert alert-warning" style="padding: 10px; margin-bottom: 10px; border: 1px solid #ffc107; border-radius: 5px; background-color: #fff3cd; color: #856404; text-align: center;">
+{{ g.translations['delivery_not_covered_for_this_area_yet'] }}
+</div>
+<input type="submit" value="{{ g.translations['Send_Order'] }}" disabled style="background-color: #ccc; cursor: not-allowed; font-size: 20px !important;">
+ {% else %}
+<input type="submit" value="{{ g.translations['Send_Order'] }}" style="background-color: rgb(255, 153, 0); font-size: 20px !important;" onsubmit="applyPromoCode();">
+{% endif %}
+
+ </div>
+</form>
+
+<br>
+<form action="{{ url_for('clear_order') }}" method="post" onsubmit="return validateOrder();">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<div class="form-group" style="min-width: 190px !important; max-width: 190px !important; font-size: 20px !important;">
+<input type="submit" value="{{ g.translations['Clear_Order'] }}" style="color: gray !important; background-color: lightgray !important; font-size: 20px !important;">
+</div>
+</form>
+               
+</div>
+</div>
+</div>
+
+
+<!-- Modal structure for final price preview -->
+<div id="pricePreviewModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" id="closeModal">&times;</span>
+        <h3>{{ g.translations['Discount_If_You_Send_The_Order'] }}:</h3>
+        <div id="pricePreviewContent">
+            <!-- Discount and final price details will be inserted here dynamically -->
+        </div>
+    </div>
+</div>
+{% endblock %}

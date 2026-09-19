@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}{{ g.translations['Remove_a_Product'] }}{% endblock %}
+{% block content %}
+<a href="{{ url_for('home') }}" class="back-button">{{ g.translations['Back_to_Home'] }}</a>
+<h1>{{ g.translations['Remove_a_Product'] }}</h1>
+
+<div class="form-container">
+<form action="{{ url_for('remove') }}" method="post">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="form-group-login-signup">
+        <label for="product-select">{{ g.translations['Select_Product'] }}</label>
+        <select id="product-select" name="product_id" required>
+            <option value="">{{ g.translations['Select_Product'] }}</option>
+            {% for product in products %}
+                <option value="{{ product.id }}">
+                    {{ product.name_en if g.current_language == 'en' else product.name_ar }}
+                </option>
+            {% endfor %}
+        </select>
+        <br>
+        <input type="submit" value="{{ g.translations['Remove_Product'] }}">
+    </div>
+</form>
+</div>
+<br><br><br><br><br><br><br><br>
+{% endblock %}

@@ -1,0 +1,36 @@
+User-agent: *
+Allow: /
+
+Disallow: /create-translation
+Disallow: /google/login
+Disallow: /google/callback
+Disallow: /complete-profile
+Disallow: /login
+Disallow: /reset_password_request
+Disallow: /reset_password
+Disallow: /signup
+Disallow: /confirm
+Disallow: /logout
+Disallow: /currentuser_profile_editing
+Disallow: /update_cart_quantity
+Disallow: /get_order_summary
+Disallow: /clear_order
+Disallow: /apply_promocode
+Disallow: /send_order
+Disallow: /paymob_redirect_handler
+Disallow: /order_client_viewer
+Disallow: /wishlist
+Disallow: /remove_from_cart
+Disallow: /admin
+Disallow: /ordercard_plus_button
+Disallow: /ordercard_minus_button
+Disallow: /orderhistory_client_viewer
+Disallow: /orders
+Disallow: /superadmin_admin_signup
+Disallow: /download_accounts_data
+Disallow: /download_orders_data
+Disallow: /add
+Disallow: /remove
+Disallow: /update
+
+Sitemap: https://hawary.shop/sitemap.xml

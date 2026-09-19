@@ -1,0 +1,388 @@
+{% extends 'base.html' %}
+{% block title %}{{ g.translations['Add_a_New_Product'] }}{% endblock %}
+{% block content %}
+
+<style>
+    /*
+    ==========================================================================
+    -- DETAILED & HIGH-SPECIFICITY STYLES FOR ADD PRODUCT PAGE --
+    ==========================================================================
+    */
+
+    /* --- Main Container Override --- */
+    #add-product-container {
+        display: block; /* Override display: flex */
+        max-width: 800px; /* Set a reasonable max-width for the form */
+        margin: 20px auto; /* Center the container */
+        padding: 20px;
+        border: 1px solid #e9e9e9;
+        border-radius: 12px;
+        background-color: #f0f2f5;
+    }
+
+    #add-product-container .form-group-add-product {
+        max-width: 75%; /* Use full width inside the container */
+        padding: 0;
+    }
+
+    #add-product-container input[type="text"],
+    #add-product-container textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 16px;
+        box-sizing: border-box;
+    }
+
+    #add-product-container textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    #add-product-container #size-price-container {
+        padding: 15px;
+        border: 1px dashed #ccc;
+        border-radius: 8px;
+        margin-top: 15px;
+        background-color: #fff;
+    }
+
+    #add-product-container .size-price-entry input[type="text"]{
+        text-align: center;
+    }    
+    
+    #add-product-container .size-price-entry {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* Responsive grid for inputs */
+        gap: 10px;
+        padding: 15px 0;
+        border-bottom: 1px solid #eee;
+    }
+    #add-product-container .size-price-entry:last-child {
+        border-bottom: none;
+    }
+
+    #add-product-container .image-upload-container {
+        margin-top: 20px;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #fff;
+    }
+    #add-product-container .image-upload-container h3 {
+        margin-top: 0;
+        color: #333;
+    }
+    /* *** UPDATED STYLE FOR HYBRID INPUT *** */
+    #add-product-container .image-upload-entry {
+        display: flex;
+        flex-wrap: wrap; /* Allow wrapping on small screens */
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    #add-product-container .image-upload-entry:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+
+    #add-product-container .image-upload-entry label {
+        font-weight: bold;
+        min-width: 80px;
+        color: #555;
+    }
+    #add-product-container .image-upload-entry input[type="file"] {
+        flex-grow: 1;
+    }
+    #add-product-container .image-preview {
+        width: 50px;
+        height: 50px;
+        border: 1px solid #ccc;
+        background-color: #fff;
+        background-size: cover;
+        background-position: center;
+        border-radius: 4px;
+    }
+
+    #add-product-container button,
+    #add-product-container input[type="submit"] {
+        width: auto; /* Override fixed width */
+        padding: 10px 20px; /* Better padding */
+        margin: 10px 5px 10px 0; /* Adjust margin */
+        font-size: 16px;
+        font-weight: bold;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.2s;
+    }
+
+    #add-product-container .add-size-btn {
+        background-color: #28a745; /* Green */
+        color: white;
+        border: none;
+    }
+    #add-product-container .add-size-btn:hover {
+        background-color: #218838;
+        transform: translateY(0px);
+    }
+
+    #add-product-container .remove-size-price {
+        background-color: #dc3545; /* Red */
+        color: white;
+        border: none;
+        grid-column: 1 / -1;
+        justify-self: start;
+        margin: 0px;
+    }
+     #add-product-container .remove-size-price:hover {
+        background-color: #c82333;
+    }
+
+    #add-product-container .submit-product-btn {
+        background-color: #007bff; /* Blue */
+        color: white;
+        border: none;
+        width: 100%; /* Make the final submit button full-width */
+        font-size: 18px;
+        margin-top: 5px;
+    }
+    #add-product-container .submit-product-btn:hover {
+        background-color: #0069d9;
+    }
+    
+    /* This is the wrapper for our custom button */
+    #add-product-container .file-input-wrapper {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+        cursor: pointer;
+    }
+
+    /* This is our new, styled, translatable button */
+    #add-product-container .file-input-wrapper .file-input-label {
+        display: inline-block;
+        padding: 5px;
+        text-align: center;
+        font-size: 14px;
+        font-weight: normal;
+        color: white;
+        background-color: #28a745;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    
+    
+    /* This is the original, ugly button that we now hide */
+    #add-product-container .file-input-wrapper .file-input-hidden {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0; /* Make it invisible */
+        cursor: pointer;
+    }
+    .rtl #add-product-container .file-input-wrapper .file-input-hidden {
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0; /* Make it invisible */
+        cursor: pointer;
+    }
+    
+    
+    
+    
+    #add-product-container .file-input-name {
+        font-size: 14px;
+        color: #555;
+    }    
+    
+    #add-product-container .image-preview {
+        width: 50px;
+        height: 50px;
+        border: 1px solid #ccc;
+        background-color: #fff;
+        background-size: cover;
+        background-position: center;
+        border-radius: 4px;
+    }    
+      
+    #add-product-container .image-preview {
+        margin-right: unset;
+        margin-right: 5px;
+        margin-left: auto;  /* Push to right */
+    }
+
+    .rtl #add-product-container .image-preview {
+        margin-left: unset;
+        margin-left: 5px;
+        margin-right: auto; /* Push to left in RTL */
+    }    
+
+    @media (max-width: 768px) {
+    
+    #add-product-container .form-group-add-product {
+        max-width: 100%; /* Override the restrictive 250px width */
+    }    
+    
+        #add-product-container {
+            margin: 5px;
+            padding: 10px;
+        }
+        #add-product-container .size-price-entry {
+            grid-template-columns: 1fr 1fr; /* Simpler 2-column layout on mobile */
+        }
+        #add-product-container .image-upload-entry {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        #add-product-container .image-upload-entry label {
+            margin-bottom: 0px;
+        }
+    }
+</style>
+
+
+<a href="{{ url_for('home') }}" class="back-button">{{ g.translations['Back_to_Home'] }}</a>
+<h1>{{ g.translations['Add_a_New_Product'] }}</h1>
+<div id="add-product-container" class="form-container">
+<form action="{{ url_for('add') }}" method="post" enctype="multipart/form-data">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<div class="form-group-add-product">
+    <input type="text" name="name_en" placeholder="{{ g.translations['Product_Name_EN'] }}" required><br>
+    <input type="text" name="name_ar" placeholder="{{ g.translations['Product_Name_AR'] }}" required><br>
+    <input type="text" name="category_en" placeholder="{{ g.translations['Category_EN'] }}" required><br>
+    <input type="text" name="category_ar" placeholder="{{ g.translations['Category_AR'] }}" required><br>
+    <input type="text" name="ingredients_en" placeholder="{{ g.translations['Ingredients_EN'] }}" required><br>
+    <input type="text" name="ingredients_ar" placeholder="{{ g.translations['Ingredients_AR'] }}" required><br>
+    <input type="text" name="gender_en" placeholder="{{ g.translations['Gender_EN'] }}" required><br>
+    <input type="text" name="gender_ar" placeholder="{{ g.translations['Gender_AR'] }}" required><br>
+    <textarea name="description_en" placeholder="{{ g.translations['Description_EN'] }}" required></textarea><br>
+    <textarea name="description_ar" placeholder="{{ g.translations['Description_AR'] }}" required></textarea><br>
+    <input type="number" name="discount_percent" placeholder="{{ g.translations['Discount_Percent'] | default('Discount Percent (%)') }}" step="0.01" min="0" max="100" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 6px;"><br>
+<br>    
+<!-- Dynamic Size-Price Input Fields -->
+<div id="size-price-container">
+    <div class="size-price-entry">
+        <input type="text" name="size_en[]" placeholder="{{ g.translations['Product_Size_EN'] }}" required>
+        <input type="text" name="size_ar[]" placeholder="{{ g.translations['Product_Size_AR'] }}" required>
+        <input type="text" inputmode="decimal" pattern="^\d*\.?\d*$" class="custom-number-input" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" name="price[]" placeholder="{{ g.translations['Price'] }} ({{ g.translations['EGP'] }})" step="0.01" min="0" required>
+        <input type="text" inputmode="decimal" pattern="^\d*\.?\d*$" class="custom-number-input" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" name="available_quantity[]" placeholder="{{ g.translations['Available_Quantity'] }}" min="0" required>             
+        <input type="text" inputmode="decimal" pattern="^\d*\.?\d*$" class="custom-number-input" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" name="weight_kg[]" placeholder="{{ g.translations['Weight_KG'] }}" step="0.01" min="0" required>
+        <input type="text" inputmode="decimal" pattern="^\d*\.?\d*$" class="custom-number-input" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" name="length_cm[]" placeholder="{{ g.translations['Length_CM'] }}" step="0.01" min="0" required>
+        <input type="text" inputmode="decimal" pattern="^\d*\.?\d*$" class="custom-number-input" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" name="width_cm[]" placeholder="{{ g.translations['Width_CM'] }}" step="0.01" min="0" required>
+        <input type="text" inputmode="decimal" pattern="^\d*\.?\d*$" class="custom-number-input" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" name="height_cm[]" placeholder="{{ g.translations['Height_CM'] }}" step="0.01" min="0" required>        
+        <button type="button" class="remove-size-price" onclick="removeSizePrice(this)">{{ g.translations['Remove_qm'] }}</button>
+    </div>
+</div>
+<button type="button" class="add-size-btn" onclick="addSizePrice()">{{ g.translations['Add_Size'] }}</button>
+    
+    <br> <br>
+    
+    
+            <!-- ================== HYBRID IMAGE INPUT SECTION ================== -->
+            <div class="image-upload-container">
+                <h3>{{ g.translations['Product_Images'] }}</h3>
+                <p>{{ g.translations['upload_image_note'] }}</p>
+                <p><b>{{ g.translations['Or'] }}</b> {{ g.translations['image_url_note'] }}</p>
+                  <br>
+
+                {% for i in range(1, 11) %}
+                <div class="image-upload-entry">
+                    <!-- File Upload (Cloudinary) -->
+                    <div class="file-input-wrapper">
+                        <label for="image_file_{{ i }}" class="file-input-label">{{ g.translations['Choose_File'] }}</label>
+                        <input type="file" name="image_file_{{ i }}" id="image_file_{{ i }}" class="file-input-hidden" accept="image/png, image/jpeg, image/webp" onchange="updateFileName(this, 'file_name_{{ i }}'); previewImage(this, 'preview_{{ i }}');">
+                    </div>
+                    <span class="file-input-name" id="file_name_{{ i }}">{{ g.translations['No_file_chosen'] }}</span>
+
+                    <!-- Image Preview -->
+                    <span class="image-preview" id="preview_{{ i }}"></span>
+                    
+                    <!-- Text Input (Static URL) -->
+                    <input type="text" name="image_url_{{ i }}" placeholder="{{ g.translations['Image_URL_Placeholder'] }}" style="flex-grow: 1;">
+
+                </div>
+                {% endfor %}
+            </div>
+            <!-- ================================================================= -->
+ 
+    
+    
+            <input type="submit" class="submit-product-btn" value="{{ g.translations['Add_Product'] }}">
+        </div>
+        
+        
+    </form>
+</div>
+{% endblock %}
+
+{% block additionalscript %}
+<script>
+
+
+    function addSizePrice() {
+        let container = document.getElementById("size-price-container");
+        let newEntry = document.createElement("div");
+        newEntry.classList.add("size-price-entry");
+        newEntry.innerHTML = `
+            <input type="text" name="size_en[]" placeholder="${translations['Product_Size_EN']}" required>
+            <input type="text" name="size_ar[]" placeholder="${translations['Product_Size_AR']}" required>
+            <input type="text" inputmode="decimal" pattern="^\\d*\\.?\\d*$" class="custom-number-input"
+                oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\\..*)\\./g, '$1');"
+                name="price[]" placeholder="${translations['Price']} (${translations['EGP']})" step="0.01" min="0" required>
+            <input type="text" inputmode="decimal" pattern="^\\d*\\.?\\d*$" class="custom-number-input"
+                oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\\..*)\\./g, '$1');"
+                name="available_quantity[]" placeholder="${translations['available_quantity']}" min="0" required>
+            <input type="text" inputmode="decimal" pattern="^\\d*\\.?\\d*$" class="custom-number-input"
+                oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\\..*)\\./g, '$1');"
+                name="weight_kg[]" placeholder="${translations['Weight_KG']}" step="0.01" min="0" required>
+            <input type="text" inputmode="decimal" pattern="^\\d*\\.?\\d*$" class="custom-number-input"
+                oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\\..*)\\./g, '$1');"
+                name="length_cm[]" placeholder="${translations['Length_CM']}" step="0.01" min="0" required>
+            <input type="text" inputmode="decimal" pattern="^\\d*\\.?\\d*$" class="custom-number-input"
+                oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\\..*)\\./g, '$1');"
+                name="width_cm[]" placeholder="${translations['Width_CM']}" step="0.01" min="0" required>
+            <input type="text" inputmode="decimal" pattern="^\\d*\\.?\\d*$" class="custom-number-input"
+                oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\\..*)\\./g, '$1');"
+                name="height_cm[]" placeholder="${translations['Height_CM']}" step="0.01" min="0" required>
+            <button type="button" class="remove-size-price" onclick="removeSizePrice(this)">${translations['Remove_qm']}</button>`;
+        container.appendChild(newEntry);
+        }
+    function removeSizePrice(button) {
+        button.parentElement.remove();
+    }
+    
+    function previewImage(input, previewId) {
+        const preview = document.getElementById(previewId);
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.style.backgroundImage = `url('${e.target.result}')`;
+            }
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            preview.style.backgroundImage = 'none';
+        }
+    }    
+    
+    function updateFileName(input, nameId) {
+        const nameDisplay = document.getElementById(nameId);
+        if (input.files && input.files[0]) {
+            // Display the actual filename to the user
+            nameDisplay.textContent = input.files[0].name;
+        } else {
+            // Use the translation if no file is chosen
+            nameDisplay.textContent = "{{ g.translations['No_file_chosen'] }}";
+        }
+    }    
+    
+</script>
+{% endblock %}

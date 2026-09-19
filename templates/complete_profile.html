@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}{{ g.translations['Complete_Your_Profile'] }}{% endblock %}
+{% block content %}
+<h1>{{ g.translations['Complete_Your_Profile'] }}</h1>
+<div class="form-container">
+
+<form action="{{ url_for('complete_profile') }}" method="post">
+
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+<div class="form-group-login-signup">
+
+<input type="text" 
+       name="full_name" 
+       value="{{ current_user.full_name if current_user.full_name!='not available' else '' }}" 
+       placeholder="{{ g.translations['Full_Name'] }}" 
+       required>
+<br>
+
+<input type="text" name="mobile" placeholder="{{ g.translations['Mobile'] }}" required><br>
+
+<select name="area" id="area-select" required>
+  <option disabled selected value="">{{ g.translations['Select_Area'] }}</option>
+  {% for gov in governorates %}
+    <option value="{{ gov }}" {% if current_user.area == gov %}selected{% endif %}>
+      {{ g.translations[gov] }}
+    </option>
+  {% endfor %}
+</select>
+
+
+
+
+
+
+
+<input type="text" name="address" placeholder="{{ g.translations['Address'] }}" required><br>
+<input type="submit" value="{{ g.translations['Complete_Your_Profile'] }}">
+</div>
+
+</form>
+
+</div>
+{% endblock %}
+
