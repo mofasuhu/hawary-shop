@@ -47,6 +47,14 @@ Captured from the live demo ([mist-app.onrender.com](https://mist-app.onrender.c
 | Checkout payment choice (Bank Card / COD) | Product detail (Arabic) |
 | ![Checkout](docs/screenshots/21-checkout.png) | ![Product AR](docs/screenshots/22-bilingual-product-ar.png) |
 
+### Multi-image product gallery
+
+Products support up to **10** images. Example from the live demo ([product 36](https://mist-app.onrender.com/product/36?product_size_id=66)):
+
+| Image 1 + thumbnails | Alternate image selected |
+|---|---|
+| ![Gallery 1](docs/screenshots/23-product-multi-images.png) | ![Gallery 2](docs/screenshots/24-product-multi-images-alt.png) |
+
 ### Admin
 
 | | |
