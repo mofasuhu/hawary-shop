@@ -12,6 +12,52 @@ Production-oriented **bilingual (Arabic / English)** e-commerce platform built w
 
 ---
 
+---
+
+## Live product screenshots
+
+Captured from the live demo ([mist-app.onrender.com](https://mist-app.onrender.com/)).
+
+### Storefront (public)
+
+| | |
+|---|---|
+| Home (Arabic / RTL) | Home (English) |
+| ![Home AR](docs/screenshots/01-home-ar.png) | ![Home EN](docs/screenshots/02-home-en.png) |
+| Product detail | About |
+| ![Product](docs/screenshots/03-product.png) | ![About](docs/screenshots/04-about.png) |
+
+### Client account
+
+| | |
+|---|---|
+| Logged-in home | Wishlist |
+| ![Client home](docs/screenshots/05-client-home.png) | ![Wishlist](docs/screenshots/06-client-wishlist.png) |
+| Orders | Cart |
+| ![Orders](docs/screenshots/07-client-orders.png) | ![Cart](docs/screenshots/08-client-cart.png) |
+
+![Client profile (title crop)](docs/screenshots/09-client-profile.png)
+
+### Admin
+
+| | |
+|---|---|
+| Admin home + visitor stats | Orders management |
+| ![Admin home](docs/screenshots/10-admin-home.png) | ![Admin orders](docs/screenshots/11-admin-orders.png) |
+| Catalog / product update | Transactions |
+| ![Products](docs/screenshots/12-admin-products.png) | ![Transactions](docs/screenshots/13-admin-transactions.png) |
+| Wishlists oversight | Accounts |
+| ![Wishlists](docs/screenshots/14-admin-wishlists.png) | ![Accounts](docs/screenshots/15-admin-accounts.png) |
+
+### Superadmin
+
+| | |
+|---|---|
+| Superadmin home | Create admin |
+| ![SA home](docs/screenshots/16-superadmin-home.png) | ![Create admin](docs/screenshots/17-superadmin-create-admin.png) |
+
+![Translation management](docs/screenshots/18-superadmin-translation.png)
+
 ## Why this project matters
 
 Hawary Shop is not a tutorial cart — it is a full storefront + admin operations system with:
